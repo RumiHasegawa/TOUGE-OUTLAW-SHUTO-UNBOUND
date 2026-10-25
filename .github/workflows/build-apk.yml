@@ -15,7 +15,7 @@ jobs:
       - name: 📦 Checkout Repository
         uses: actions/checkout@v4
 
-      # --- 2. Setup Node.js untuk Capacitor CLI (Tanpa lockfile check) ---
+      # --- 2. Setup Node.js untuk Capacitor CLI ---
       - name: 🟢 Setup Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -33,23 +33,29 @@ jobs:
         run: |
           npm install --no-audit --prefer-offline
 
-      # --- 5. Tambah Platform Android & Sync aset game ---
+      # --- 5. Siapkan folder web (www) untuk Capacitor ---
+      - name: 📁 Prepare Web Directory (www)
+        run: |
+          mkdir -p www
+          cp -r index.html manifest.json assets src models www/
+
+      # --- 6. Tambah Platform Android & Sync aset game ---
       - name: 📱 Setup Android Platform & Sync Web Assets
         run: |
           npx cap add android || true
           npx cap sync android
 
-      # --- 6. Beri izin eksekusi pada Gradle wrapper ---
+      # --- 7. Beri izin eksekusi pada Gradle wrapper ---
       - name: 🔑 Make Gradlew Executable
         run: chmod +x android/gradlew
 
-      # --- 7. Build APK Debug (ARM64/Universal) ---
+      # --- 8. Build APK Debug (ARM64/Universal) ---
       - name: 🔨 Build Android APK (Debug)
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      # --- 8. Upload hasil APK sebagai GitHub Actions Artifact ---
+      # --- 9. Upload hasil APK sebagai GitHub Actions Artifact ---
       - name: 📤 Upload APK ke GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:

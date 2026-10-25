@@ -1,8 +1,7 @@
 {
   "appId": "com.outlaw.shutounbound",
   "appName": "Touge Outlaw: Shuto Unbound",
-  "webDir": ".",
-  "bundledWebRuntime": false,
+  "webDir": "www",
   "android": {
     "allowMixedContent": true,
     "backgroundColor": "#060814",

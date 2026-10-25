@@ -7,4 +7,6 @@ android/
 Thumbs.db
 car_scan_results.json
 *.log
+www/
+
 
