@@ -1,0 +1,11 @@
+Model Information:
+* title:	2020 KRC Japan Kit Mazda RX-8 SE3P
+* source:	https://sketchfab.com/3d-models/2020-krc-japan-kit-mazda-rx-8-se3p-a260c09a81a043009a0b4927e1626809
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2020 KRC Japan Kit Mazda RX-8 SE3P" (https://sketchfab.com/3d-models/2020-krc-japan-kit-mazda-rx-8-se3p-a260c09a81a043009a0b4927e1626809) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

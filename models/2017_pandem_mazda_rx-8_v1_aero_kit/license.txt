@@ -1,0 +1,11 @@
+Model Information:
+* title:	2017 Pandem Mazda RX-8 V1 Aero Kit
+* source:	https://sketchfab.com/3d-models/2017-pandem-mazda-rx-8-v1-aero-kit-203789cc802846398a191939871bc9ff
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2017 Pandem Mazda RX-8 V1 Aero Kit" (https://sketchfab.com/3d-models/2017-pandem-mazda-rx-8-v1-aero-kit-203789cc802846398a191939871bc9ff) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

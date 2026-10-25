@@ -1,0 +1,8 @@
+Model Information:
+* title:	Honda NSX (NC1)
+* source:	https://sketchfab.com/3d-models/honda-nsx-nc1-d287a3da58b3476a8b398fc4334916b8
+* author:	KOElkast1007 (https://sketchfab.com/koelkastasbers)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

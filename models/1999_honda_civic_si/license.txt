@@ -1,0 +1,11 @@
+Model Information:
+* title:	1999 Honda Civic Si
+* source:	https://sketchfab.com/3d-models/1999-honda-civic-si-ce29e75eb129406f874e0423ab8869c3
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "1999 Honda Civic Si" (https://sketchfab.com/3d-models/1999-honda-civic-si-ce29e75eb129406f874e0423ab8869c3) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

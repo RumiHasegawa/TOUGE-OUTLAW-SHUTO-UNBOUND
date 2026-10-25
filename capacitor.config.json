@@ -1,0 +1,23 @@
+{
+  "appId": "com.outlaw.shutounbound",
+  "appName": "Touge Outlaw: Shuto Unbound",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#060814",
+    "overrideUserAgent": "TougeOutlaw/1.0 Android",
+    "appendUserAgent": "ShutoUnbound"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#060814",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "Keyboard": {
+      "resize": "none"
+    }
+  }
+}

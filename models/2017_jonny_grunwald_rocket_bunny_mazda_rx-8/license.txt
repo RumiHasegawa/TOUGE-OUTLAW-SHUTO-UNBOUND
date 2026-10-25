@@ -1,0 +1,11 @@
+Model Information:
+* title:	2017 Jonny Grunwald Rocket Bunny Mazda RX-8
+* source:	https://sketchfab.com/3d-models/2017-jonny-grunwald-rocket-bunny-mazda-rx-8-e6ea84aaffa24b3cac226bae756c5123
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2017 Jonny Grunwald Rocket Bunny Mazda RX-8" (https://sketchfab.com/3d-models/2017-jonny-grunwald-rocket-bunny-mazda-rx-8-e6ea84aaffa24b3cac226bae756c5123) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

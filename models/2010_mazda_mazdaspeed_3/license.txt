@@ -1,0 +1,11 @@
+Model Information:
+* title:	2010 Mazda Mazdaspeed 3
+* source:	https://sketchfab.com/3d-models/2010-mazda-mazdaspeed-3-0a954cfa1e64452ba06c151b9cc50242
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2010 Mazda Mazdaspeed 3" (https://sketchfab.com/3d-models/2010-mazda-mazdaspeed-3-0a954cfa1e64452ba06c151b9cc50242) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

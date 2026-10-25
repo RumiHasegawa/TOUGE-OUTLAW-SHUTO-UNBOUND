@@ -1,0 +1,10 @@
+node_modules/
+android/
+.gradle/
+*.apk
+*.aab
+.DS_Store
+Thumbs.db
+car_scan_results.json
+*.log
+

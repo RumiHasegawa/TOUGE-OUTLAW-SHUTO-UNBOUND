@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOUGE OUTLAW: SHUTO UNBOUND</title>
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="manifest" href="manifest.json">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Three.js & GLTF Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0c10;
+            font-family: 'Rajdhani', sans-serif;
+            color: #fff;
+        }
+
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Anime Comic Halftone Overlay */
+        .comic-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            background: radial-gradient(circle, transparent 55%, rgba(10, 5, 20, 0.75) 100%);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Anime Speed Lines (Active during NOS/High Speed) */
+        #speed-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 6;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            background: radial-gradient(circle, transparent 40%, rgba(255, 255, 255, 0.15) 80%, rgba(255, 0, 128, 0.4) 100%);
+        }
+
+        /* --- UI SCREEN LAYERS --- */
+        .screen-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+        .screen-ui.interactive {
+            pointer-events: auto;
+        }
+
+        /* HEADER HUD */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+        }
+        .game-logo {
+            font-family: 'Bangers', cursive;
+            font-size: 26px;
+            letter-spacing: 2px;
+            color: #ff0055;
+            text-shadow: 3px 3px 0 #00ffff, -2px -2px 0 #000;
+            transform: skewX(-10deg);
+        }
+        .crew-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 20, 35, 0.85);
+            padding: 6px 14px;
+            border-left: 4px solid #00ffaa;
+            border-radius: 4px;
+            border-bottom: 2px solid #00ffaa;
+        }
+        .crew-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0055, #00ffff);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        /* DRIFT & MULTIPLIER (NFS Carbon Style) */
+        .drift-hud {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        }
+        .drift-hud.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.05);
+        }
+        .drift-title {
+            font-family: 'Bangers', cursive;
+            font-size: 32px;
+            color: #ffdd00;
+            text-shadow: 3px 3px 0 #ff0055, -2px -2px 0 #000;
+            letter-spacing: 2px;
+        }
+        .drift-points {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* SPEEDOMETER & NOS GAUGE */
+        .speedo-cluster {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+        .speed-readout {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 58px;
+            font-weight: 900;
+            font-style: italic;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+        .speed-unit {
+            font-size: 14px;
+            letter-spacing: 3px;
+            color: #00ffff;
+            font-weight: 700;
+        }
+        .nos-gauge-container {
+            width: 160px;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ff0055;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+            transform: skewX(-15deg);
+        }
+        .nos-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0077, #ffdd00);
+            transition: width 0.1s linear;
+        }
+
+        /* MOBILE TOUCH CONTROLS (NFS Style) */
+        .mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .control-group-left, .control-group-right {
+            display: flex;
+            gap: 14px;
+            pointer-events: auto;
+        }
+        .touch-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(15, 20, 30, 0.75);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bangers', cursive;
+            font-size: 18px;
+            backdrop-filter: blur(5px);
+            touch-action: manipulation;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+        .touch-btn:active, .touch-btn.pressed {
+            transform: scale(0.92);
+            background: rgba(255, 0, 85, 0.6);
+            border-color: #ff0055;
+            box-shadow: 0 0 20px #ff0055;
+        }
+        .btn-gas {
+            width: 75px;
+            height: 75px;
+            border-color: #00ffaa;
+            font-size: 20px;
+            background: rgba(0, 255, 170, 0.15);
+        }
+        .btn-brake {
+            border-color: #ff3344;
+            background: rgba(255, 50, 70, 0.15);
+        }
+        .btn-handbrake {
+            border-color: #ffaa00;
+            background: rgba(255, 170, 0, 0.15);
+        }
+        .btn-nos {
+            border-color: #ff00aa;
+            background: linear-gradient(135deg, rgba(255,0,128,0.3), rgba(0,255,255,0.3));
+            font-size: 20px;
+        }
+        .btn-wingman {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.15);
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        /* --- UNBOUND STYLE CUSTOMIZATION GARAGE OVERLAY --- */
+        #garage-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 10, 18, 0.92);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
+        }
+        .garage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 2px solid #ff0055;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .garage-title {
+            font-family: 'Bangers', cursive;
+            font-size: 32px;
+            color: #00ffff;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 #ff0055;
+        }
+        .garage-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .garage-sidebar {
+            width: 280px;
+            background: rgba(12, 16, 26, 0.95);
+            border-right: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .garage-panel {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .cat-btn {
+            padding: 12px 16px;
+            background: rgba(25, 30, 45, 0.8);
+            border: 2px solid transparent;
+            color: #aaa;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .cat-btn:hover, .cat-btn.active {
+            color: #fff;
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .part-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .part-card {
+            background: rgba(18, 22, 34, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .part-card:hover, .part-card.selected {
+            border-color: #ff0055;
+            background: rgba(255, 0, 85, 0.15);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            transform: translateY(-2px);
+        }
+        .part-brand {
+            font-size: 11px;
+            color: #00ffff;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .part-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .part-desc {
+            font-size: 12px;
+            color: #889;
+            line-height: 1.3;
+        }
+
+        /* Stance Sliders */
+        .slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(20, 25, 40, 0.7);
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 3px solid #ff0055;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ddd;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00ffff;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00ffff;
+        }
+
+        .btn-action {
+            padding: 12px 28px;
+            font-family: 'Bangers', cursive;
+            font-size: 22px;
+            letter-spacing: 1.5px;
+            background: linear-gradient(45deg, #ff0055, #ff5500);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+            transform: skewX(-10deg);
+            transition: all 0.2s;
+        }
+        .btn-action:hover {
+            transform: skewX(-10deg) scale(1.05);
+            box-shadow: 0 0 25px #ff0055;
+        }
+
+        /* Radio Dialog Anime Cut-in (NFS Carbon Style) */
+        .anime-radio-box {
+            position: absolute;
+            top: 75px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(10, 15, 25, 0.9);
+            border: 2px solid #00ffff;
+            border-left: 6px solid #ff0055;
+            padding: 10px 16px;
+            border-radius: 4px;
+            max-width: 320px;
+            pointer-events: none;
+            transform: translateX(-150%);
+            transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 30;
+        }
+        .anime-radio-box.active {
+            transform: translateX(0);
+        }
+        .radio-portrait {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            background: #222;
+            border: 2px solid #ff0055;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .radio-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .radio-sender {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #00ffff;
+            font-weight: 700;
+        }
+        .radio-msg {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        /* --- ANIME CINEMATIC CUTSCENE SYSTEM (NFS CARBON INTRO STYLE) --- */
+        #cutscene-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 150;
+            background: rgba(4, 6, 12, 0.94);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: auto;
+            transition: opacity 0.5s ease;
+        }
+        .cinematic-bar {
+            width: 100%;
+            height: 55px;
+            background: #000;
+            border-bottom: 2px solid #ff0055;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+        }
+        .cinematic-bar.bottom {
+            border-bottom: none;
+            border-top: 2px solid #00ffff;
+        }
+        .cutscene-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cutscene-stage {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            width: 90%;
+            max-width: 950px;
+            position: relative;
+        }
+        .cutscene-char-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+        .cutscene-char-card.inactive {
+            opacity: 0.35;
+            filter: grayscale(80%);
+            transform: scale(0.9);
+        }
+        .char-portrait-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1f2438, #0e1220);
+            border: 4px solid #ff0055;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            margin-bottom: 12px;
+        }
+        .cutscene-dialogue-panel {
+            background: rgba(12, 16, 28, 0.92);
+            border: 2px solid #00ffff;
+            border-left: 8px solid #ff0055;
+            border-radius: 6px;
+            padding: 16px 22px;
+            max-width: 650px;
+            width: 90%;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .dialogue-speaker {
+            font-family: 'Bangers', cursive;
+            font-size: 24px;
+            color: #ffdd00;
+            letter-spacing: 1.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .dialogue-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+        .skip-cutscene-btn {
+            background: transparent;
+            border: 2px solid #ff0055;
+            color: #ff0055;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .skip-cutscene-btn:hover {
+            background: #ff0055;
+            color: #fff;
+        }
+
+        /* --- STUDIO SPLASH INTRO (EA / GHOST GAMES PARODY) --- */
+        #splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            transition: opacity 0.8s ease;
+        }
+        .splash-logo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.85);
+            transition: all 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        .splash-logo-box.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .parody-studio-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+        .parody-studio-sub {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            letter-spacing: 12px;
+            color: #ff0055;
+            margin-top: 6px;
+            font-weight: 700;
+        }
+
+        /* --- TITLE START SCREEN (PRESS START TO RACE) --- */
+        #title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(12, 18, 35, 0.6) 0%, rgba(3, 4, 10, 0.95) 100%);
+            backdrop-filter: blur(4px);
+            z-index: 250;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            pointer-events: auto;
+            transition: opacity 0.8s ease;
+        }
+        .title-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px;
+        }
+        .title-main-text {
+            font-family: 'Bangers', cursive;
+            font-size: 64px;
+            letter-spacing: 4px;
+            color: #ff0055;
+            text-shadow: 4px 4px 0 #00ffff, -3px -3px 0 #000;
+            transform: skewX(-10deg);
+            text-align: center;
+            line-height: 1.1;
+        }
+        .title-sub-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: #00ffff;
+            margin-top: 8px;
+            font-weight: 700;
+        }
+        .start-prompt-btn {
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 85, 0.35), transparent);
+            border: none;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            cursor: pointer;
+            padding: 18px 50px;
+            border-top: 2px solid #00ffff;
+            border-bottom: 2px solid #ff0055;
+            animation: pulseGlow 1.4s infinite alternate;
+            outline: none;
+            touch-action: manipulation;
+        }
+        @keyframes pulseGlow {
+            0% { transform: scale(1); opacity: 0.8; text-shadow: 0 0 10px #00ffff; }
+            100% { transform: scale(1.06); opacity: 1; text-shadow: 0 0 25px #ff0055, 0 0 10px #00ffff; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STUDIO SPLASH INTRO (EA & GHOST PARODY) -->
+    <div id="splash-screen">
+        <div class="splash-logo-box" id="splash-logo-box">
+            <div class="parody-studio-brand" id="splash-brand-title">ELECTRONIC APEX</div>
+            <div class="parody-studio-sub" id="splash-sub-title">PRESENTS</div>
+        </div>
+    </div>
+
+    <!-- TITLE SCREEN (PRESS START TO RACE) -->
+    <div id="title-screen">
+        <div class="title-hero">
+            <div class="title-main-text">TOUGE OUTLAW<br>SHUTO UNBOUND</div>
+            <div class="title-sub-text">MIDNIGHT RACING // ANIME DRIFT</div>
+        </div>
+
+        <button class="start-prompt-btn" onclick="startJapaneseIntroCutscene()">PRESS START / TAP LAYAR</button>
+
+        <div style="font-size: 11px; color: #889; letter-spacing: 2px;">© 2026 NIGHT PHANTOM STUDIO // TOKYO SHUTO SYSTEM</div>
+    </div>
+
+    <!-- 3D Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Comic Manga Halftone Vignette -->
+    <div class="comic-vignette"></div>
+    <div id="speed-lines"></div>
+
+    <!-- HUD Overlay -->
+    <div class="screen-ui" id="hud-overlay">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="game-logo">TOUGE OUTLAW // SHUTO UNBOUND</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <!-- Hardcore Music OSD Pill -->
+                <div id="music-track-title" style="font-size: 11px; color: #ff007f; font-family: 'Orbitron'; font-weight: 700; background: rgba(0,0,0,0.7); border: 1px solid #ff007f; padding: 4px 10px; border-radius: 20px; text-shadow: 0 0 10px #ff007f;">
+                    🎵 NOW PLAYING: GEN-OUTLAW x BANGTAN-X (HARDSTYLE PHONK REMIX) [155 BPM]
+                </div>
+                <div class="crew-status">
+                    <div class="crew-avatar" id="hud-crew-avatar">Y</div>
+                    <div>
+                        <div style="font-size: 10px; color: #00ffaa; font-weight: 700;" id="hud-crew-name">WINGMAN: YUKI [DRAFTER]</div>
+                        <div style="font-size: 12px; font-weight: 700;" id="wingman-mode">DRAFT BOOST READY</div>
+                    </div>
+                </div>
+                <button class="btn-action" style="font-size: 13px; padding: 8px 12px; background: linear-gradient(45deg, #ff0055, #ffaa00);" onclick="toggleBlacklistModal(true)">🏆 KUROLIST 17</button>
+                <button class="btn-action" style="font-size: 13px; padding: 8px 12px; background: linear-gradient(45deg, #00ffff, #0077ff);" onclick="toggleCharacterCreator(true)">👤 KARAKTER</button>
+                <button class="btn-action" style="font-size: 13px; padding: 8px 12px;" onclick="toggleGarage(true)">🔧 GARASI</button>
+            </div>
+        </div>
+
+        <!-- Anime Radio Callout -->
+        <div class="anime-radio-box" id="radio-callout">
+            <div class="radio-portrait" id="radio-avatar">🏎️</div>
+            <div class="radio-content">
+                <div class="radio-sender" id="radio-name">YUKI [DRAFTER]</div>
+                <div class="radio-msg" id="radio-text">"Masuk di belakangku! Aku buka angin slipstream!"</div>
+            </div>
+        </div>
+
+        <!-- Drift Multiplier HUD -->
+        <div class="drift-hud" id="drift-hud">
+            <div class="drift-title" id="drift-label">KANSEI DRIFT!</div>
+            <div class="drift-points" id="drift-score">0 PTS (x1.0)</div>
+        </div>
+
+        <!-- Speedometer -->
+        <div class="speedo-cluster">
+            <div class="speed-readout" id="speed-val">0</div>
+            <div class="speed-unit">KM/H</div>
+            <div class="nos-gauge-container">
+                <div class="nos-fill" id="nos-fill"></div>
+            </div>
+            <div style="font-size: 10px; color: #ff00aa; font-weight: 700; margin-top: 3px;">BURST NITRO TAG</div>
+        </div>
+
+        <!-- Mobile Touch Controls -->
+        <div class="mobile-controls">
+            <!-- Left Controls: Steering & Handbrake -->
+            <div class="control-group-left">
+                <button class="touch-btn" id="btn-left">◀</button>
+                <button class="touch-btn" id="btn-right">▶</button>
+                <button class="touch-btn btn-handbrake" id="btn-handbrake">DRIFT</button>
+            </div>
+
+            <!-- Right Controls: Gas, Brake, NOS, Wingman -->
+            <div class="control-group-right">
+                <button class="touch-btn btn-wingman" id="btn-crew">CREW<br>CALL</button>
+                <button class="touch-btn btn-nos" id="btn-nos">NOS</button>
+                <button class="touch-btn btn-brake" id="btn-brake">REM</button>
+                <button class="touch-btn btn-gas" id="btn-gas">GAS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NFS UNBOUND STYLE GARAGE MODAL -->
+    <div id="garage-modal" style="display: none;">
+        <div class="garage-header">
+            <div class="garage-title">CUSTOM GARAGE // MECHA WORKS</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="font-size: 14px; color: #00ffaa; font-weight: 700;">CASH: ¥12,500,000</div>
+                <button class="btn-action" onclick="toggleGarage(false)">TURUN KE JALANAN</button>
+            </div>
+        </div>
+
+        <div class="garage-content">
+            <!-- Sidebar Category -->
+            <div class="garage-sidebar">
+                <button class="cat-btn active" onclick="switchGarageTab('cars')">PILIH MOBIL</button>
+                <button class="cat-btn" onclick="switchGarageTab('bodykit')">BODY KIT & AERO</button>
+                <button class="cat-btn" onclick="switchGarageTab('tuning')">PERFORMANCE TUNING</button>
+                <button class="cat-btn" onclick="switchGarageTab('vinyl')">VINYL & DECAL LIVERY</button>
+                <button class="cat-btn" onclick="switchGarageTab('bumper_delete')">BUMPER DELETE</button>
+                <button class="cat-btn" onclick="switchGarageTab('stance')">STANCE & FITMENT</button>
+                <button class="cat-btn" onclick="switchGarageTab('paint')">WARNA & NEON</button>
+                <button class="cat-btn" onclick="switchGarageTab('unbound_tags')">UNBOUND ANIME TAGS</button>
+            </div>
+
+            <!-- Main Panel Content -->
+            <div class="garage-panel" id="garage-panel-body">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 17 KUROLIST RIVALS MODAL (PARODY SHADOW REGISTRY) -->
+    <div id="blacklist-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 14, 0.95); backdrop-filter: blur(10px); z-index: 130; flex-direction: column; pointer-events: auto;">
+        <div class="garage-header">
+            <div class="garage-title" style="color: #ffaa00;">KUROLIST 17 // SHUTO SHADOW REGISTRY</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="font-size: 13px; color: #00ffaa; font-family: 'Orbitron'; font-weight: 700;" id="player-bounty-display">BOUNTY: ¥8,500</div>
+                <button class="btn-action" style="font-size: 15px; padding: 8px 20px;" onclick="toggleBlacklistModal(false)">TUTUP</button>
+            </div>
+        </div>
+
+        <div class="garage-content">
+            <!-- Left Side: Selected Blacklist Boss Dossier -->
+            <div style="width: 330px; background: rgba(14, 18, 30, 0.95); border-right: 2px solid rgba(255, 170, 0, 0.3); padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div id="bl-boss-avatar" style="width: 75px; height: 75px; border-radius: 8px; background: #222; border: 3px solid #ffaa00; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 0 20px rgba(255, 170, 0, 0.4);">🧢</div>
+                    <div>
+                        <div id="bl-boss-rank" style="font-family: 'Bangers'; font-size: 26px; color: #ffaa00;">#17 SONNY</div>
+                        <div id="bl-boss-crew" style="font-size: 11px; color: #aaa; letter-spacing: 1px;">CREW: ROOKIE SPARKS</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px; border-left: 3px solid #00ffff;">
+                    <div style="font-size: 10px; color: #00ffff; font-family: 'Orbitron';">RIDE // MOBIL TARGET</div>
+                    <div id="bl-boss-car" style="font-size: 13px; color: #fff; font-weight: 700; margin-top: 2px;">MATSUDA Midget-2 [Neon Lime]</div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px; border-left: 3px solid #ff0055;">
+                    <div style="font-size: 10px; color: #ff0055; font-family: 'Orbitron';">SYARAT TANTANGAN // BOUNTY</div>
+                    <div id="bl-boss-req" style="font-size: 12px; color: #ffdd00; font-weight: 700; margin-top: 2px;">Bounty Diperlukan: ¥5,000 (SIAP DITANTANG)</div>
+                </div>
+
+                <div style="font-size: 12px; color: #bbb; line-height: 1.4; font-style: italic;" id="bl-boss-bio">
+                    "Anak baru di Shuto yang banyak omong. Modal mobil compact tapi punya nyali besar."
+                </div>
+
+                <div style="background: rgba(255, 0, 85, 0.15); border: 1px solid #ff0055; padding: 10px; border-radius: 4px; color: #ff0055; font-size: 12px; font-weight: 700;" id="bl-boss-taunt">
+                    "Hatchback kecil gue bisa nyalip lu di tikungan sempit C1, anak baru!"
+                </div>
+
+                <button class="btn-action" id="bl-challenge-btn" style="margin-top: 10px; font-size: 16px; width: 100%;" onclick="challengeBlacklistRival()">TANTANG DUEL BLACKLIST ⚔️</button>
+            </div>
+
+            <!-- Right Side: 17 Blacklist Grid -->
+            <div class="garage-panel" style="padding: 15px;">
+                <div style="font-family: 'Orbitron'; font-size: 13px; color: #ffaa00; margin-bottom: 12px; font-weight: 700;">DAFTAR 17 PEMBALAP PALING DICARI DI SHUTO (BLACKLIST)</div>
+                <div class="part-grid" id="blacklist-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
+                    <!-- Injected via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NFS UNBOUND STYLE ANIME CHARACTER CREATOR MODAL -->
+    <div id="character-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 15, 0.95); backdrop-filter: blur(10px); z-index: 120; flex-direction: column; pointer-events: auto;">
+        <div class="garage-header">
+            <div class="garage-title" style="color: #ff007f;">ANIME DRIVER CREATOR // STREETWEAR UNBOUND</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="font-size: 13px; color: #00ffff; font-family: 'Orbitron', sans-serif;" id="preview-driver-name">PILOT: REN 'PHANTOM' KAI</div>
+                <button class="btn-action" style="font-size: 15px; padding: 8px 20px;" onclick="saveAndCloseCharacterCreator()">SIMPAN & SELESAI</button>
+            </div>
+        </div>
+
+        <div class="garage-content">
+            <!-- Left Character Preview (Visualizer 2D Anime Avatar Avatar Card) -->
+            <div style="width: 320px; background: rgba(15, 18, 30, 0.95); border-right: 2px solid rgba(255,255,255,0.1); padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                <div style="font-family: 'Bangers', cursive; font-size: 18px; color: #ffdd00; letter-spacing: 1px; margin-bottom: 10px;">DRIVING TAG PREVIEW</div>
+                
+                <!-- Anime Avatar Stage -->
+                <div id="anime-avatar-stage" style="width: 200px; height: 260px; border-radius: 12px; background: linear-gradient(180deg, #182038 0%, #0d101d 100%); border: 3px solid #ff007f; box-shadow: 0 0 30px rgba(255, 0, 127, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <!-- Visual Halftone Dots -->
+                    <div style="position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.5) 100%); pointer-events: none;"></div>
+                    <!-- Big Anime Icon Avatar -->
+                    <div id="char-avatar-face" style="font-size: 96px; z-index: 2; transition: all 0.2s;">👦</div>
+                    <!-- Accessory Overlay -->
+                    <div id="char-avatar-acc" style="font-size: 38px; position: absolute; top: 75px; z-index: 3;">🕶️</div>
+                    <!-- Outfit Badge -->
+                    <div id="char-avatar-outfit" style="position: absolute; bottom: 25px; font-size: 42px; z-index: 2;">🧥</div>
+                </div>
+
+                <!-- Driver Card Info -->
+                <div style="margin-top: 15px; text-align: center; width: 100%;">
+                    <div id="char-card-style" style="font-family: 'Orbitron', sans-serif; font-size: 14px; color: #00ffff; font-weight: 700;">HYPE STREETWEAR</div>
+                    <div id="char-card-quote" style="font-size: 12px; color: #8899aa; font-style: italic; margin-top: 5px;">"Di tikungan Shuto, bayanganku yang memimpin!"</div>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="garage-sidebar" style="width: 200px;">
+                <button class="cat-btn active" onclick="switchCharTab('hair')">💇 RAMBUT & GAYA</button>
+                <button class="cat-btn" onclick="switchCharTab('face')">👀 MATA & KULIT</button>
+                <button class="cat-btn" onclick="switchCharTab('outfit')">🧥 STREETWEAR</button>
+                <button class="cat-btn" onclick="switchCharTab('accessory')">🕶️ AKSESORIS</button>
+                <button class="cat-btn" onclick="switchCharTab('pose')">🧍 POSE KEMENANGAN</button>
+            </div>
+
+            <!-- Options Panel Body -->
+            <div class="garage-panel" id="char-panel-body">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ANIME CINEMATIC CUTSCENE MODAL (NFS RIVALS STYLE - DUAL PERSPECTIVE) -->
+    <div id="cutscene-overlay">
+        <!-- TOP BAR: Act Title & Side Badge -->
+        <div class="cinematic-bar">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div id="cs-side-badge" style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: #00ffaa; letter-spacing: 2px;">👻 NIGHT PHANTOM</div>
+                <div id="cs-act-label" style="font-family: 'Bangers', cursive; color: #ff0055; font-size: 20px; letter-spacing: 1px;">PROLOG: ASPAL YANG MEMANGGIL</div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="cs-track-info" style="font-size: 11px; color: #00ffff; font-family: 'Orbitron', sans-serif;">📍 Daikoku Fureai Pier, Yokohama</div>
+                <button class="skip-cutscene-btn" onclick="endCutscene()">LEWATI ⏭</button>
+            </div>
+        </div>
+
+        <!-- CENTER: Narration Panel + Character Portraits -->
+        <div class="cutscene-body">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; width: 95%; max-width: 1000px;">
+
+                <!-- Narration Text Box (Background Setting Cinematic) -->
+                <div style="
+                    background: rgba(4, 8, 16, 0.85);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-left: 4px solid #00ffff;
+                    padding: 14px 20px;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    color: #aabbcc;
+                    font-style: italic;
+                    line-height: 1.6;
+                    text-align: center;
+                    width: 100%;
+                " id="cs-setting-narration">
+                    Di bawah cahaya biru bulan yang memantul di Teluk Yokohama, kamu baru tiba.
+                    Satu tas punggung. Satu mobil. Satu reputasi yang belum ada di sini.
+                </div>
+
+                <!-- Character Portraits Row -->
+                <div class="cutscene-stage">
+                    <!-- Kiri: Night Phantom Side -->
+                    <div class="cutscene-char-card" id="cs-char-yuki">
+                        <div class="char-portrait-large">🏎️</div>
+                        <div style="font-family: 'Bangers', cursive; font-size: 18px; color: #00ffaa;">YUKI [DRAFTER]</div>
+                        <div style="font-size: 10px; color: #aaa; letter-spacing: 1px;">NIGHT PHANTOM</div>
+                    </div>
+
+                    <!-- Tengah: Setting / Location Badge -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <div style="font-family: 'Bangers', cursive; font-size: 40px; color: rgba(255,255,255,0.07);">VS</div>
+                    </div>
+
+                    <!-- Kanan: Rival Side -->
+                    <div class="cutscene-char-card inactive" id="cs-char-kenji">
+                        <div class="char-portrait-large" style="border-color: #ff3300; box-shadow: 0 0 25px rgba(255,50,0,0.6);">😈</div>
+                        <div style="font-family: 'Bangers', cursive; font-size: 18px; color: #ff3300;">KENJI 'THE DEMON'</div>
+                        <div style="font-size: 10px; color: #aaa; letter-spacing: 1px;">MIDNIGHT CINDERS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: Dialogue Box -->
+        <div class="cinematic-bar bottom">
+            <div class="cutscene-dialogue-panel">
+                <div class="dialogue-speaker">
+                    <span id="cs-speaker-name">YUKI KUSANAGI</span>
+                    <span style="font-size: 12px; color: #00ffff; font-family: 'Rajdhani', sans-serif; font-weight: 600;">TAP / KETUK UNTUK LANJUT ▶</span>
+                </div>
+                <div class="dialogue-text" id="cs-dialogue-content">
+                    "Jadi ini orangnya. Kata orang-orang, kamu yang paling cepat dari balapan Kanagawa bulan lalu. Aku penasaran."
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="src/carsData.js"></script>
+    <script src="src/crewData.js"></script>
+    <script src="src/storyData.js"></script>
+    <script src="src/characterData.js"></script>
+    <script src="src/soundtrackEngine.js"></script>
+    <script src="src/blacklistData.js"></script>
+    <script src="src/vinylEngine.js"></script>
+    <script src="src/animeEffects.js"></script>
+    <script src="src/gameEngine.js"></script>
+</body>
+</html>
