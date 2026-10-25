@@ -78,6 +78,9 @@ function init() {
     // Build Canyon Road & Scenery
     buildCanyonTrack();
 
+    // Build NFS Carbon 3D Safehouse Garage Stage
+    buildSafehouseGarage();
+
     // Load Saved Game Data (Mobil & Modifikasi)
     loadGameData();
 
@@ -90,6 +93,7 @@ function init() {
 
     // Setup Mobile & Keyboard Controls
     setupInputListeners();
+    setupSafehouseControls();
 
     // Populate Garage UI
     renderGarageCategories('cars');
@@ -684,13 +688,17 @@ function animate() {
     const delta = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
 
-    updateCarPhysics(delta);
-    updateTrafficAndAI(delta);
-    updateCamera();
-    updateHUD();
+    if (isSafehouseMode) {
+        updateSafehouseTurntable(delta);
+    } else {
+        updateCarPhysics(delta);
+        updateTrafficAndAI(delta);
+        updateCamera();
+        updateHUD();
 
-    if (effectsManager) {
-        effectsManager.updateSmoke(delta);
+        if (effectsManager) {
+            effectsManager.updateSmoke(delta);
+        }
     }
 
     renderer.render(scene, camera);
@@ -1800,6 +1808,12 @@ const JAPANESE_RIVALS_MONOLOGUES = [
 ];
 
 function startJapaneseIntroCutscene() {
+    isSafehouseMode = false;
+    const carbonMenu = document.getElementById('carbon-main-menu');
+    if (carbonMenu) carbonMenu.style.display = 'none';
+    if (safehouseGroup) safehouseGroup.visible = false;
+    roadSegments.forEach(r => r.group.visible = true);
+
     const titleScreen = document.getElementById('title-screen');
     const cutsceneOverlay = document.getElementById('cutscene-overlay');
 
@@ -2000,6 +2014,366 @@ function challengeBlacklistRival() {
     }
 
     showRadioMessage(`BLACKLIST #${boss.rank}`, `${boss.alias}: "${boss.taunt}"`, boss.avatar);
+}
+
+// ============================================================
+// --- NFS CARBON SAFEHOUSE GARAGE 3D ENVIRONMENT & MAIN MENU ---
+// ============================================================
+let isSafehouseMode = false;
+let safehouseGroup = null;
+let safehouseRibbon = null;
+let safehouseDragVelocity = 0;
+let isSafehouseDragging = false;
+let safehouseLastX = 0;
+let currentMenuTab = 'career';
+const CARBON_MENU_TABS = ['career', 'garage', 'blacklist', 'character', 'quickrace'];
+
+function buildSafehouseGarage() {
+    safehouseGroup = new THREE.Group();
+    safehouseGroup.visible = false;
+
+    // 1. Showroom Polished Asphalt Floor (with subtle reflectivity)
+    const floorGeo = new THREE.PlaneGeometry(80, 80);
+    const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x141824,
+        roughness: 0.35,
+        metalness: 0.4
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.02;
+    safehouseGroup.add(floor);
+
+    // Tire marks / skid marks on floor
+    const skidGeo = new THREE.RingGeometry(2.6, 3.4, 32);
+    const skidMat = new THREE.MeshBasicMaterial({
+        color: 0x070912,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.75
+    });
+    const skidMesh = new THREE.Mesh(skidGeo, skidMat);
+    skidMesh.rotation.x = -Math.PI / 2;
+    skidMesh.position.set(0, 0.01, 0);
+    safehouseGroup.add(skidMesh);
+
+    // 2. Back Workshop Wall with industrial bays
+    const backWallGeo = new THREE.BoxGeometry(70, 18, 1.5);
+    const backWallMat = new THREE.MeshStandardMaterial({
+        color: 0x181d2a,
+        roughness: 0.8,
+        metalness: 0.2
+    });
+    const backWall = new THREE.Mesh(backWallGeo, backWallMat);
+    backWall.position.set(0, 9, -12);
+    safehouseGroup.add(backWall);
+
+    // Garage Bay Roller Shutter Doors (2 bays)
+    [-13, 13].forEach(xBay => {
+        const bayDoorGeo = new THREE.BoxGeometry(18, 11, 0.4);
+        const bayDoorMat = new THREE.MeshStandardMaterial({
+            color: 0x242a3a,
+            roughness: 0.4,
+            metalness: 0.8
+        });
+        const bayDoor = new THREE.Mesh(bayDoorGeo, bayDoorMat);
+        bayDoor.position.set(xBay, 5.5, -11.1);
+        safehouseGroup.add(bayDoor);
+    });
+
+    // Concrete Industrial Pillars with hazard stripes
+    [-24, -4, 4, 24].forEach(xPillar => {
+        const pillarGeo = new THREE.BoxGeometry(1.4, 18, 1.4);
+        const pillarMat = new THREE.MeshStandardMaterial({
+            color: 0x303646,
+            roughness: 0.6,
+            metalness: 0.5
+        });
+        const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+        pillar.position.set(xPillar, 9, -11);
+        safehouseGroup.add(pillar);
+    });
+
+    // 3. Iconic Red Neon Sign (NFS Carbon "PALMONT CITY MOTOR" style)
+    const signFrameGeo = new THREE.BoxGeometry(26, 2.0, 0.5);
+    const signFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f1118, metalness: 0.9, roughness: 0.2 });
+    const signFrame = new THREE.Mesh(signFrameGeo, signFrameMat);
+    signFrame.position.set(0, 11.5, -11);
+    safehouseGroup.add(signFrame);
+
+    // Glowing Neon Bar Letters "SHUTO SPEED MOTOR // 東京首都高"
+    const neonBarGeo = new THREE.BoxGeometry(24, 0.9, 0.3);
+    const neonBarMat = new THREE.MeshBasicMaterial({ color: 0xff1144 });
+    const neonBar = new THREE.Mesh(neonBarGeo, neonBarMat);
+    neonBar.position.set(0, 11.5, -10.7);
+    safehouseGroup.add(neonBar);
+
+    // Red Neon Glow Spill Light
+    const neonPointLight = new THREE.PointLight(0xff1155, 3.5, 30);
+    neonPointLight.position.set(0, 11, -9);
+    safehouseGroup.add(neonPointLight);
+
+    // 4. Signature Curved Blue Neon Light Ribbon (NFS Carbon Light Trail)
+    const curvePoints = [
+        new THREE.Vector3(-14, 0.5, 4),
+        new THREE.Vector3(-8, 3.8, 2),
+        new THREE.Vector3(-3, 4.8, -1),
+        new THREE.Vector3(2, 3.2, -4),
+        new THREE.Vector3(8, 2.5, -3),
+        new THREE.Vector3(14, 4.2, 3),
+        new THREE.Vector3(18, 1.0, 6)
+    ];
+    const ribbonCurve = new THREE.CatmullRomCurve3(curvePoints);
+    const tubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.14, 8, false);
+    const ribbonMat = new THREE.MeshBasicMaterial({
+        color: 0x00e5ff,
+        transparent: true,
+        opacity: 0.9
+    });
+    safehouseRibbon = new THREE.Mesh(tubeGeo, ribbonMat);
+    safehouseGroup.add(safehouseRibbon);
+
+    // Extra outer glow tube
+    const outerTubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.4, 8, false);
+    const outerTubeMat = new THREE.MeshBasicMaterial({
+        color: 0x0088ff,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.BackSide
+    });
+    const outerRibbon = new THREE.Mesh(outerTubeGeo, outerTubeMat);
+    safehouseRibbon.add(outerRibbon);
+
+    // 5. Tire stacks & Oil barrels
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.85 });
+    [-9, 9].forEach(xStack => {
+        for (let j = 0; j < 3; j++) {
+            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.45, 18), tireMat);
+            tire.position.set(xStack + (Math.random() * 0.4), 0.225 + (j * 0.45), -6);
+            safehouseGroup.add(tire);
+        }
+    });
+
+    // 6. Showcase Key Spotlight on Car
+    const carSpotlight = new THREE.SpotLight(0xfff8ee, 3.8, 25, Math.PI / 4, 0.4, 1);
+    carSpotlight.position.set(4, 8, 5);
+    carSpotlight.target.position.set(0, 0.5, 0);
+    safehouseGroup.add(carSpotlight);
+    safehouseGroup.add(carSpotlight.target);
+
+    // Cyan Rim Fill Light
+    const cyanRimLight = new THREE.SpotLight(0x00ffcc, 2.8, 20, Math.PI / 3, 0.5, 1);
+    cyanRimLight.position.set(-6, 4, -4);
+    cyanRimLight.target.position.set(0, 0.5, 0);
+    safehouseGroup.add(cyanRimLight);
+    safehouseGroup.add(cyanRimLight.target);
+
+    scene.add(safehouseGroup);
+}
+
+function setupSafehouseControls() {
+    window.addEventListener('mousedown', (e) => {
+        if (!isSafehouseMode) return;
+        isSafehouseDragging = true;
+        safehouseLastX = e.clientX;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isSafehouseMode || !isSafehouseDragging || !playerCar) return;
+        const deltaX = e.clientX - safehouseLastX;
+        safehouseLastX = e.clientX;
+        safehouseDragVelocity = deltaX * 0.015;
+        playerCar.rotation.y += safehouseDragVelocity;
+    });
+
+    window.addEventListener('mouseup', () => { isSafehouseDragging = false; });
+
+    // Touch support for mobile
+    window.addEventListener('touchstart', (e) => {
+        if (!isSafehouseMode || e.touches.length === 0) return;
+        isSafehouseDragging = true;
+        safehouseLastX = e.touches[0].clientX;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!isSafehouseMode || !isSafehouseDragging || !playerCar || e.touches.length === 0) return;
+        const deltaX = e.touches[0].clientX - safehouseLastX;
+        safehouseLastX = e.touches[0].clientX;
+        safehouseDragVelocity = deltaX * 0.018;
+        playerCar.rotation.y += safehouseDragVelocity;
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { isSafehouseDragging = false; });
+}
+
+function openCarbonMainMenu() {
+    isSafehouseMode = true;
+
+    // Sembunyikan layar lain
+    const splash = document.getElementById('splash-screen');
+    if (splash) splash.style.display = 'none';
+
+    const titleScreen = document.getElementById('title-screen');
+    if (titleScreen) titleScreen.style.display = 'none';
+
+    const hudOverlay = document.getElementById('hud-overlay');
+    if (hudOverlay) hudOverlay.style.display = 'none';
+
+    // Tampilkan NFS Carbon Main Menu
+    const menuEl = document.getElementById('carbon-main-menu');
+    if (menuEl) menuEl.style.display = 'flex';
+
+    // Tampilkan 3D Safehouse Garage
+    if (safehouseGroup) safehouseGroup.visible = true;
+
+    // Sembunyikan segmen jalan raya saat di garasi
+    roadSegments.forEach(r => r.group.visible = false);
+
+    // Posisikan mobil di tengah panggung dengan sudut 3/4 depan heroik (seperti Audi R8 di foto)
+    if (playerCar) {
+        playerCar.position.set(0, 0, 0);
+        playerCar.rotation.set(0, -0.45, 0);
+    }
+
+    // Kamera Safehouse dramatis dari sudut depan bawah
+    camera.position.set(3.8, 1.4, 5.2);
+    camera.lookAt(0, 0.7, 0);
+
+    // Update kartu spesifikasi mobil
+    updateCarbonMenuCarCard();
+
+    // Mainkan musik Safehouse / Garage
+    if (typeof musicEngine !== 'undefined') {
+        musicEngine.setMusicMood("garage");
+        musicEngine.startBgmLoop();
+    }
+}
+
+function updateSafehouseTurntable(delta) {
+    if (!playerCar) return;
+
+    if (isSafehouseDragging) {
+        // Rotasi diatur drag mouse / touch
+    } else {
+        if (Math.abs(safehouseDragVelocity) > 0.0001) {
+            playerCar.rotation.y += safehouseDragVelocity;
+            safehouseDragVelocity *= 0.92;
+        } else {
+            // Rotasi perlahan ala turntable pameran mobil
+            playerCar.rotation.y += 0.004;
+        }
+    }
+
+    // Animasi bernafas pada pita cahaya neon biru Carbon
+    if (safehouseRibbon) {
+        safehouseRibbon.rotation.y = Math.sin(performance.now() * 0.001) * 0.04;
+    }
+
+    camera.position.set(3.8, 1.4, 5.2);
+    camera.lookAt(0, 0.7, 0);
+}
+
+function selectCarbonMenuTab(tabKey) {
+    currentMenuTab = tabKey;
+    CARBON_MENU_TABS.forEach(t => {
+        const btn = document.getElementById('cmenu-' + t);
+        if (btn) {
+            if (t === tabKey) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+    });
+
+    playSynthTone(320, 0.08, 'sine', 0.2);
+}
+
+function nextCarbonMenuTab() {
+    const idx = CARBON_MENU_TABS.indexOf(currentMenuTab);
+    const nextIdx = (idx + 1) % CARBON_MENU_TABS.length;
+    selectCarbonMenuTab(CARBON_MENU_TABS[nextIdx]);
+}
+
+function prevCarbonMenuTab() {
+    const idx = CARBON_MENU_TABS.indexOf(currentMenuTab);
+    const prevIdx = (idx - 1 + CARBON_MENU_TABS.length) % CARBON_MENU_TABS.length;
+    selectCarbonMenuTab(CARBON_MENU_TABS[prevIdx]);
+}
+
+function executeCarbonMenuAction() {
+    playSynthTone(550, 0.15, 'sawtooth', 0.25);
+
+    if (currentMenuTab === 'career') {
+        startJapaneseIntroCutscene();
+    } else if (currentMenuTab === 'garage') {
+        toggleGarage(true);
+    } else if (currentMenuTab === 'blacklist') {
+        toggleBlacklistModal(true);
+    } else if (currentMenuTab === 'character') {
+        toggleCharacterCreator(true);
+    } else if (currentMenuTab === 'quickrace') {
+        startQuickRaceDirectly();
+    }
+}
+
+function startQuickRaceDirectly() {
+    isSafehouseMode = false;
+    const menuEl = document.getElementById('carbon-main-menu');
+    if (menuEl) menuEl.style.display = 'none';
+
+    if (safehouseGroup) safehouseGroup.visible = false;
+    roadSegments.forEach(r => r.group.visible = true);
+
+    const hudOverlay = document.getElementById('hud-overlay');
+    if (hudOverlay) hudOverlay.style.display = 'flex';
+
+    if (playerCar) {
+        playerCar.position.set(0, 0, 0);
+        playerCar.rotation.set(0, 0, 0);
+    }
+    speed = 120; // Langsung tancap gas!
+
+    if (typeof musicEngine !== 'undefined') {
+        musicEngine.setMusicMood("sprint");
+    }
+
+    showRadioMessage("RACE START!", "HAJAR GAS POL! SHUTO EXPRESSWAY CANYON SPRINT!", "🏁");
+}
+
+function returnToCarbonMainMenu() {
+    toggleGarage(false);
+    toggleBlacklistModal(false);
+    toggleCharacterCreator(false);
+
+    openCarbonMainMenu();
+}
+
+function updateCarbonMenuCarCard() {
+    if (!currentCarData) return;
+    const brandEl = document.getElementById('cmenu-car-brand');
+    const nameEl = document.getElementById('cmenu-car-name');
+    const tierEl = document.getElementById('cmenu-car-tier');
+    const speedEl = document.getElementById('cmenu-spec-speed');
+    const accelEl = document.getElementById('cmenu-spec-accel');
+    const barSpeed = document.getElementById('cmenu-bar-speed');
+    const barAccel = document.getElementById('cmenu-bar-accel');
+
+    if (brandEl) brandEl.innerText = currentCarData.brand;
+    if (nameEl) nameEl.innerText = currentCarData.parodyName;
+    if (tierEl) tierEl.innerText = `TIER ${currentCarData.tier} // ${currentCarData.tierName}`;
+    if (speedEl) speedEl.innerText = `${currentCarData.specs.topSpeed} KM/H`;
+    if (accelEl) accelEl.innerText = `${currentCarData.specs.accel}s`;
+
+    if (barSpeed) barSpeed.style.width = `${Math.min(100, (currentCarData.specs.topSpeed / 380) * 100)}%`;
+    if (barAccel) barAccel.style.width = `${Math.min(100, ((6.5 - currentCarData.specs.accel) / 4) * 100)}%`;
+}
+
+function cycleNextCarFromMenu() {
+    const curIdx = CAR_DATABASE.findIndex(c => c.id === currentCarData.id);
+    const nextIdx = (curIdx + 1) % CAR_DATABASE.length;
+    currentCarData = CAR_DATABASE[nextIdx];
+    spawnPlayerCar(currentCarData);
+    updateCarbonMenuCarCard();
+    playSynthTone(420, 0.1, 'sine', 0.2);
+    showRadioMessage("SHOWROOM", `${currentCarData.brand} — ${currentCarData.parodyName}`, "🏎️");
 }
 
 // Start Game on load
