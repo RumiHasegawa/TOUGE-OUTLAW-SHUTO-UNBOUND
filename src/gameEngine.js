@@ -49,21 +49,28 @@ function init() {
     const canvas = document.getElementById('game-canvas');
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x060814); // Night Canyon sky
-    scene.fog = new THREE.FogExp2(0x0a0d20, 0.007);
+    scene.fog = new THREE.FogExp2(0x060814, 0.003); // Lighter fog so highway is clearly visible
 
-    camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+    camera.position.set(0, 3.2, 7.5);
+    camera.lookAt(0, 1.2, -10);
+
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
-    // Lighting (Anime Moody Night Canyon)
-    const ambientLight = new THREE.AmbientLight(0x445577, 1.2);
+    // Lighting (Anime Moody Night Canyon - Brighter so models & road pop)
+    const ambientLight = new THREE.AmbientLight(0x7788aa, 1.8);
     scene.add(ambientLight);
 
-    const moonLight = new THREE.DirectionalLight(0xaaccff, 1.8);
+    const moonLight = new THREE.DirectionalLight(0xaaccff, 2.2);
     moonLight.position.set(50, 150, -50);
     scene.add(moonLight);
+
+    const headLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    headLight.position.set(0, 20, 30);
+    scene.add(headLight);
 
     // Init Anime Effects
     effectsManager = new AnimeEffectsManager(scene);
@@ -116,8 +123,8 @@ function buildCanyonTrack() {
     for (let i = 0; i < TOTAL_SEGMENTS; i++) {
         const segGroup = new THREE.Group();
         const zPos = -i * SEGMENT_LENGTH;
-        // Kurva khas jalan tol Shuto C1 Loop (meliuk di antara gedung kota)
-        const curveX = Math.sin(i * 0.1) * 35 + Math.cos(i * 0.04) * 20;
+        // Kurva khas jalan tol Shuto C1 Loop (dimulai tepat di x = 0 di bawah mobil pemain)
+        const curveX = Math.sin(i * 0.08) * 30 + (Math.cos(i * 0.04) - 1) * 20;
 
         // Aspal Jalan Tol 4-Lajur Shuto
         const roadGeo = new THREE.PlaneGeometry(ROAD_WIDTH, SEGMENT_LENGTH);
@@ -429,10 +436,8 @@ async function scanFolderForModel(folderPath) {
  * Main spawn function — uses new carsData.js baseModel structure
  */
 function spawnPlayerCar(carData, kitId) {
-    if (playerCar) {
-        scene.remove(playerCar);
-        playerCar = null;
-    }
+    // Spawn procedural car instantly so the scene is NEVER empty/black!
+    _fallbackProcedural(carData);
 
     const kit = kitId
         ? (carData.bodyKits || []).find(k => k.id === kitId)
@@ -477,8 +482,6 @@ function _spawnFromBaseModel(carData, kit) {
             const found = await scanFolderForModel(bm.modelPath);
             if (found) {
                 _loadAndSpawn(found, carData.color, scale, carData, kit);
-            } else {
-                _fallbackProcedural(carData);
             }
         })();
         return;
@@ -486,14 +489,13 @@ function _spawnFromBaseModel(carData, kit) {
 
     if (modelPath) {
         _loadAndSpawn(modelPath, carData.color, scale, carData, kit);
-    } else {
-        _fallbackProcedural(carData);
     }
 }
 
 function _loadAndSpawn(modelPath, color, scale, carData, kit) {
     loadModel3D(modelPath, color, scale,
         (obj) => {
+            if (playerCar) scene.remove(playerCar);
             playerCar = obj;
             scene.add(playerCar);
             if (typeof updateCarTexture === 'function') updateCarTexture();
@@ -502,13 +504,13 @@ function _loadAndSpawn(modelPath, color, scale, carData, kit) {
             updateSpeedLimit(carData, kit);
         },
         (err) => {
-            console.warn("Model load failed, using procedural:", err);
-            _fallbackProcedural(carData);
+            console.warn("Model load failed or skipped, procedural already active:", err);
         }
     );
 }
 
 function _fallbackProcedural(carData) {
+    if (playerCar) scene.remove(playerCar);
     playerCar = createProceduralCarMesh(carData);
     playerCar.position.set(0, 0, 0);
     scene.add(playerCar);
