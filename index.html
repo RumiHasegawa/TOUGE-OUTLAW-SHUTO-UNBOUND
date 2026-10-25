@@ -707,12 +707,27 @@
 <body>
 
     <!-- STUDIO SPLASH INTRO (EA & GHOST PARODY) -->
-    <div id="splash-screen">
+    <div id="splash-screen" onclick="dismissSplashScreen()" style="cursor: pointer;">
         <div class="splash-logo-box" id="splash-logo-box">
             <div class="parody-studio-brand" id="splash-brand-title">ELECTRONIC APEX</div>
             <div class="parody-studio-sub" id="splash-sub-title">PRESENTS</div>
         </div>
+        <div style="position: absolute; bottom: 25px; font-size: 11px; color: #667; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">TAP / KLIK LAYAR UNTUK SKIP INTRO ▶</div>
     </div>
+
+    <script>
+        function dismissSplashScreen() {
+            const splash = document.getElementById('splash-screen');
+            const title = document.getElementById('title-screen');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 400);
+            }
+            if (title) title.style.display = 'flex';
+        }
+        // Fail-safe auto dismiss: maksimal 5 detik otomatis buka Title Screen
+        setTimeout(dismissSplashScreen, 5000);
+    </script>
 
     <!-- TITLE SCREEN (PRESS START TO RACE) -->
     <div id="title-screen">

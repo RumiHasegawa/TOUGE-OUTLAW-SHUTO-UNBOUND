@@ -2002,7 +2002,15 @@ function challengeBlacklistRival() {
 
 // Start Game on load
 window.onload = () => {
-    init();
-    runStudioSplashSequence();
+    try {
+        init();
+    } catch(err) {
+        console.error("Game Engine Init Warning:", err);
+    }
+    try {
+        runStudioSplashSequence();
+    } catch(e) {
+        if (typeof dismissSplashScreen === 'function') dismissSplashScreen();
+    }
 };
 
