@@ -28,35 +28,71 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # --- 4. Install semua dependency Capacitor ---
+      # --- 4. Install ImageMagick untuk konversi ikon ---
+      - name: 🖼️ Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
+      # --- 5. Install semua dependency Capacitor ---
       - name: 📥 Install NPM Dependencies (Capacitor)
         run: |
           npm install --no-audit --prefer-offline
 
-      # --- 5. Siapkan folder web (www) untuk Capacitor ---
+      # --- 6. Siapkan folder web (www) untuk Capacitor ---
       - name: 📁 Prepare Web Directory (www)
         run: |
           mkdir -p www
-          cp -r index.html manifest.json assets src models www/
+          cp -r index.html manifest.json assets src models lib www/
 
-      # --- 6. Tambah Platform Android & Sync aset game ---
+      # --- 7. Tambah Platform Android & Sync aset game ---
       - name: 📱 Setup Android Platform & Sync Web Assets
         run: |
           npx cap add android || true
           npx cap sync android
 
-      # --- 7. Beri izin eksekusi pada Gradle wrapper ---
+      # --- 8. Generate & Pasang Ikon Honda NSX ke semua ukuran Android ---
+      - name: 🎨 Generate Android App Icons (NSX Mobil 1 GT4)
+        run: |
+          SRC="assets/icon.png"
+
+          # mipmap-mdpi (48x48)
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          convert "$SRC" -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          convert "$SRC" -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+
+          # mipmap-hdpi (72x72)
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          convert "$SRC" -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          convert "$SRC" -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+
+          # mipmap-xhdpi (96x96)
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          convert "$SRC" -resize 96x96 android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          convert "$SRC" -resize 96x96 android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+
+          # mipmap-xxhdpi (144x144)
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          convert "$SRC" -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          convert "$SRC" -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+
+          # mipmap-xxxhdpi (192x192)
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          convert "$SRC" -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          convert "$SRC" -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+          echo "✅ Icon Honda NSX Mobil 1 GT4 berhasil dipasang ke semua ukuran mipmap!"
+
+      # --- 9. Beri izin eksekusi pada Gradle wrapper ---
       - name: 🔑 Make Gradlew Executable
         run: chmod +x android/gradlew
 
-      # --- 8. Build APK Debug (ARM64/Universal) ---
+      # --- 10. Build APK Debug ---
       - name: 🔨 Build Android APK (Debug)
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
           mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/TougeOutlaw-ShutoUnbound-v1.0.apk
 
-      # --- 9. Upload hasil APK sebagai GitHub Actions Artifact ---
+      # --- 11. Upload hasil APK sebagai GitHub Actions Artifact ---
       - name: 📤 Upload APK ke GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:
