@@ -832,6 +832,55 @@
             border-right: 2px solid #ffe600;
         }
 
+        /* Career Status Card (NFS Carbon Style) */
+        .carbon-career-card {
+            pointer-events: auto;
+            background: linear-gradient(135deg, rgba(8, 16, 28, 0.95), rgba(4, 7, 14, 0.92));
+            border: 1px solid rgba(0, 255, 200, 0.35);
+            border-left: 4px solid #00ffc8;
+            padding: 12px 18px;
+            border-radius: 4px;
+            width: 320px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9);
+            transform: skewX(-6deg);
+            margin-bottom: 8px;
+            box-sizing: border-box;
+        }
+
+        .career-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .career-stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .career-stat-label {
+            color: #ffffff;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .career-stat-value {
+            color: #00ffc8;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.6);
+            font-size: 14px;
+        }
+
+        .career-stat-value.cash {
+            color: #ffe600;
+            text-shadow: 0 0 10px rgba(255, 230, 0, 0.7);
+        }
+
         /* Floating Car Spec Card on Bottom-Left */
         .carbon-car-card {
             pointer-events: auto;
@@ -1028,11 +1077,11 @@
                     <div class="filmstrip-arrow" onclick="prevCarbonMenuTab()">◀</div>
                     <div class="filmstrip-dots">▪ ▪ ▪</div>
                     
-                    <button class="carbon-tab-item active" id="cmenu-career" onclick="selectCarbonMenuTab('career')">KARIER</button>
-                    <button class="carbon-tab-item" id="cmenu-garage" onclick="selectCarbonMenuTab('garage')">GARASI & MOBIL</button>
-                    <button class="carbon-tab-item" id="cmenu-blacklist" onclick="selectCarbonMenuTab('blacklist')">KUROLIST 17</button>
-                    <button class="carbon-tab-item" id="cmenu-character" onclick="selectCarbonMenuTab('character')">KARAKTER</button>
-                    <button class="carbon-tab-item" id="cmenu-quickrace" onclick="selectCarbonMenuTab('quickrace')">BALAPAN BEBAS</button>
+                    <button class="carbon-tab-item active" id="cmenu-career" onclick="selectCarbonMenuTab('career')">КАРЬЕРА // KARIER</button>
+                    <button class="carbon-tab-item" id="cmenu-garage" onclick="selectCarbonMenuTab('garage')">МОИ МАШИНЫ // GARASI</button>
+                    <button class="carbon-tab-item" id="cmenu-blacklist" onclick="selectCarbonMenuTab('blacklist')">ЧЕРНЫЙ СПИСОК // KUROLIST 17</button>
+                    <button class="carbon-tab-item" id="cmenu-character" onclick="selectCarbonMenuTab('character')">ВОДИТЕЛЬ // KARAKTER</button>
+                    <button class="carbon-tab-item" id="cmenu-quickrace" onclick="selectCarbonMenuTab('quickrace')">СВОБОДНАЯ ГОНКА // BALAP</button>
 
                     <div class="filmstrip-dots">▪ ▪ ▪</div>
                     <div class="filmstrip-arrow" onclick="nextCarbonMenuTab()">▶</div>
@@ -1040,28 +1089,42 @@
             </div>
         </div>
 
-        <!-- Center / Bottom Left: Car Specs Card -->
+        <!-- Center / Bottom Left: Career Status & Car Specs Cards -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
-            <div class="carbon-car-card" id="carbon-car-spec-card">
-                <div class="carbon-car-brand" id="cmenu-car-brand">HODANA MOTORS</div>
-                <div class="carbon-car-name" id="cmenu-car-name">Civique EK-9</div>
-                <div class="carbon-car-tier" id="cmenu-car-tier">TIER 1 // STREET ROOKIE</div>
-                
-                <div class="carbon-spec-row">
-                    <span>TOP SPEED</span>
-                    <span id="cmenu-spec-speed" style="color: #00ffc8;">220 KM/H</span>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <!-- NFS Carbon Style Career & Cash Status Panel (Screenshot 2) -->
+                <div class="carbon-career-card" id="carbon-career-status-card">
+                    <div class="career-stat-row">
+                        <span class="career-stat-label">КАРЬЕРА</span>
+                        <span class="career-stat-value" id="cmenu-career-percent">0%</span>
+                    </div>
+                    <div class="career-stat-row">
+                        <span class="career-stat-label">НАЛИЧНОСТЬ</span>
+                        <span class="career-stat-value cash" id="cmenu-career-cash">15 000</span>
+                    </div>
                 </div>
-                <div class="carbon-spec-bar"><div class="carbon-spec-fill" id="cmenu-bar-speed" style="width: 55%;"></div></div>
 
-                <div class="carbon-spec-row">
-                    <span>ACCELERATION</span>
-                    <span id="cmenu-spec-accel" style="color: #ffe600;">5.5s</span>
-                </div>
-                <div class="carbon-spec-bar"><div class="carbon-spec-fill" id="cmenu-bar-accel" style="width: 60%; background: #ffe600;"></div></div>
+                <div class="carbon-car-card" id="carbon-car-spec-card">
+                    <div class="carbon-car-brand" id="cmenu-car-brand">HODANA MOTORS</div>
+                    <div class="carbon-car-name" id="cmenu-car-name">Civique EK-9</div>
+                    <div class="carbon-car-tier" id="cmenu-car-tier">TIER 1 // STREET ROOKIE</div>
+                    
+                    <div class="carbon-spec-row">
+                        <span>TOP SPEED</span>
+                        <span id="cmenu-spec-speed" style="color: #00ffc8;">220 KM/H</span>
+                    </div>
+                    <div class="carbon-spec-bar"><div class="carbon-spec-fill" id="cmenu-bar-speed" style="width: 55%;"></div></div>
 
-                <div class="carbon-action-buttons">
-                    <button class="carbon-btn-small" onclick="selectCarbonMenuTab('garage')">🔧 MODIFIKASI</button>
-                    <button class="carbon-btn-small" onclick="cycleNextCarFromMenu()">🏎️ GANTI MOBIL</button>
+                    <div class="carbon-spec-row">
+                        <span>ACCELERATION</span>
+                        <span id="cmenu-spec-accel" style="color: #ffe600;">5.5s</span>
+                    </div>
+                    <div class="carbon-spec-bar"><div class="carbon-spec-fill" id="cmenu-bar-accel" style="width: 60%; background: #ffe600;"></div></div>
+
+                    <div class="carbon-action-buttons">
+                        <button class="carbon-btn-small" onclick="selectCarbonMenuTab('garage')">🔧 MODIFIKASI</button>
+                        <button class="carbon-btn-small" onclick="cycleNextCarFromMenu()">🏎️ GANTI MOBIL</button>
+                    </div>
                 </div>
             </div>
 
@@ -1081,7 +1144,7 @@
                 </div>
                 <div class="carbon-pill" onclick="startQuickRaceDirectly()">
                     <span class="carbon-key-badge">GAS</span>
-                    <span>BALAPAN LANGSUNG</span>
+                    <span>LANGSUNG BALAP</span>
                 </div>
             </div>
         </div>

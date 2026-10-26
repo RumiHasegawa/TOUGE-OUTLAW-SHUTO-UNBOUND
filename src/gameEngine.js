@@ -2028,23 +2028,504 @@ let safehouseLastX = 0;
 let currentMenuTab = 'career';
 const CARBON_MENU_TABS = ['career', 'garage', 'blacklist', 'character', 'quickrace'];
 
+// --- PROCEDURAL TEXTURES FOR NFS CARBON SAFEHOUSE GARAGE ---
+function createBridgeBackdropTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Twilight / Night Sky Gradient (Moody Violet & Deep Indigo)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 420);
+    skyGrad.addColorStop(0, '#040612');
+    skyGrad.addColorStop(0.35, '#120b24');
+    skyGrad.addColorStop(0.65, '#2e143b');
+    skyGrad.addColorStop(0.82, '#481c45');
+    skyGrad.addColorStop(0.92, '#18243b');
+    skyGrad.addColorStop(1.0, '#090d18');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // 2. Stars & Atmospheric Night Mist
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 90; i++) {
+        const sx = (i * 97 + 13) % 1024;
+        const sy = (i * 43 + 7) % 240;
+        const sz = (i % 3 === 0) ? 1.8 : 1.0;
+        ctx.globalAlpha = 0.3 + ((i % 5) * 0.14);
+        ctx.fillRect(sx, sy, sz, sz);
+    }
+    ctx.globalAlpha = 1.0;
+
+    // Distant mountain / hills silhouette
+    ctx.fillStyle = '#140c22';
+    ctx.beginPath();
+    ctx.moveTo(0, 370);
+    ctx.bezierCurveTo(200, 330, 400, 360, 600, 320);
+    ctx.bezierCurveTo(800, 350, 950, 330, 1024, 350);
+    ctx.lineTo(1024, 430);
+    ctx.lineTo(0, 430);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Shuto Bay / Palmont Bay Water
+    const waterGrad = ctx.createLinearGradient(0, 400, 0, 512);
+    waterGrad.addColorStop(0, '#0d162a');
+    waterGrad.addColorStop(0.5, '#070b16');
+    waterGrad.addColorStop(1, '#03050c');
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(0, 400, 1024, 112);
+
+    // 4. Distant City Skyline Lights
+    ctx.fillStyle = '#161d30';
+    for (let b = 0; b < 28; b++) {
+        const bx = b * 38;
+        const bh = 25 + ((b * 19) % 55);
+        ctx.fillRect(bx, 400 - bh, 32, bh);
+        ctx.fillStyle = '#ffe688';
+        for (let w = 0; w < 4; w++) {
+            if ((b + w) % 2 === 0) {
+                ctx.fillRect(bx + 4 + (w % 2) * 12, 400 - bh + 6 + Math.floor(w / 2) * 10, 4, 4);
+            }
+        }
+        ctx.fillStyle = '#161d30';
+    }
+
+    // 5. Massive Illuminated Suspension Bridge (Central Feature)
+    const towers = [320, 740];
+    const deckY = 385;
+    const towerTopY = 130;
+
+    // Roadway Deck
+    ctx.strokeStyle = '#222b3d';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(0, deckY + 8);
+    ctx.lineTo(1024, deckY + 8);
+    ctx.stroke();
+
+    // Roadway glowing amber/gold light string
+    ctx.strokeStyle = '#ffb338';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#ffaa00';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.moveTo(0, deckY);
+    ctx.lineTo(1024, deckY);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Roadway vehicle lights
+    for (let v = 0; v < 40; v++) {
+        const vx = (v * 26 + 10) % 1024;
+        ctx.fillStyle = (v % 3 === 0) ? '#ff2244' : '#fff4bb';
+        ctx.fillRect(vx, deckY - 1, 3, 2);
+    }
+
+    // Suspension Towers & Cables
+    towers.forEach(tx => {
+        // Steel Truss Legs (A-Frame)
+        ctx.strokeStyle = '#2d374d';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(tx - 24, deckY + 25);
+        ctx.lineTo(tx - 8, towerTopY);
+        ctx.lineTo(tx + 8, towerTopY);
+        ctx.lineTo(tx + 24, deckY + 25);
+        ctx.stroke();
+
+        // Cross Struts (X-Bracing)
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#3e4c69';
+        for (let st = 0; st < 4; st++) {
+            const sy1 = towerTopY + 20 + st * 55;
+            const sy2 = sy1 + 45;
+            ctx.beginPath();
+            ctx.moveTo(tx - 18, sy1);
+            ctx.lineTo(tx + 18, sy2);
+            ctx.moveTo(tx + 18, sy1);
+            ctx.lineTo(tx - 18, sy2);
+            ctx.stroke();
+            ctx.strokeRect(tx - 20, sy1, 40, 3);
+        }
+
+        // Tower Floodlights
+        ctx.fillStyle = '#ffeaa0';
+        ctx.shadowColor = '#ffbb44';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(tx - 5, towerTopY + 12, 10, 6);
+        ctx.fillRect(tx - 7, towerTopY + 95, 14, 5);
+
+        // Tower Peak Red Aviation Beacon
+        ctx.fillStyle = '#ff0033';
+        ctx.shadowColor = '#ff0033';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(tx, towerTopY - 6, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    });
+
+    // Main Suspension Cables (Parabolic Arches)
+    ctx.strokeStyle = '#9bb5db';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#66a2e8';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(0, deckY - 20);
+    ctx.quadraticCurveTo(160, deckY - 70, towers[0], towerTopY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(towers[0], towerTopY);
+    ctx.quadraticCurveTo(530, deckY - 30, towers[1], towerTopY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(towers[1], towerTopY);
+    ctx.quadraticCurveTo(880, deckY - 70, 1024, deckY - 20);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Vertical Hanger Cables
+    ctx.strokeStyle = 'rgba(160, 190, 225, 0.45)';
+    ctx.lineWidth = 1;
+    for (let hx = 20; hx < 1010; hx += 16) {
+        if (Math.abs(hx - towers[0]) < 12 || Math.abs(hx - towers[1]) < 12) continue;
+        let cy = deckY;
+        if (hx < towers[0]) {
+            const t = hx / towers[0];
+            cy = (1 - t) * (1 - t) * (deckY - 20) + 2 * (1 - t) * t * (deckY - 70) + t * t * towerTopY;
+        } else if (hx < towers[1]) {
+            const t = (hx - towers[0]) / (towers[1] - towers[0]);
+            cy = (1 - t) * (1 - t) * towerTopY + 2 * (1 - t) * t * (deckY - 30) + t * t * towerTopY;
+        } else {
+            const t = (hx - towers[1]) / (1024 - towers[1]);
+            cy = (1 - t) * (1 - t) * towerTopY + 2 * (1 - t) * t * (deckY - 70) + t * t * (deckY - 20);
+        }
+        ctx.beginPath();
+        ctx.moveTo(hx, cy);
+        ctx.lineTo(hx, deckY);
+        ctx.stroke();
+    }
+
+    // Water Reflections
+    towers.forEach(tx => {
+        const refGrad = ctx.createLinearGradient(0, 400, 0, 470);
+        refGrad.addColorStop(0, 'rgba(255, 180, 50, 0.4)');
+        refGrad.addColorStop(1, 'rgba(255, 180, 50, 0)');
+        ctx.fillStyle = refGrad;
+        ctx.fillRect(tx - 18, 400, 36, 70);
+    });
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+function createSyntecBannerTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+
+    // Racing Green Gradient Background
+    const bg = ctx.createLinearGradient(0, 0, 512, 256);
+    bg.addColorStop(0, '#01200b');
+    bg.addColorStop(0.5, '#043b17');
+    bg.addColorStop(1, '#011909');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, 512, 256);
+
+    // Carbon / Checkerboard faint pattern
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    for (let x = 0; x < 512; x += 16) {
+        for (let y = 0; y < 256; y += 16) {
+            if ((Math.floor(x / 16) + Math.floor(y / 16)) % 2 === 0) {
+                ctx.fillRect(x, y, 16, 16);
+            }
+        }
+    }
+
+    // Racing Stripes (White & Gold curved ribbons)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(0, 180);
+    ctx.bezierCurveTo(180, 210, 320, 140, 512, 170);
+    ctx.lineTo(512, 192);
+    ctx.bezierCurveTo(320, 162, 180, 232, 0, 202);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#ffe600';
+    ctx.beginPath();
+    ctx.moveTo(0, 195);
+    ctx.bezierCurveTo(180, 225, 320, 155, 512, 185);
+    ctx.lineTo(512, 210);
+    ctx.bezierCurveTo(320, 180, 180, 250, 0, 220);
+    ctx.closePath();
+    ctx.fill();
+
+    // Top Red Accent Line
+    ctx.fillStyle = '#ff1144';
+    ctx.fillRect(0, 0, 512, 12);
+    ctx.fillRect(0, 244, 512, 12);
+
+    // Shield Emblem with stylized Oil Drop
+    ctx.fillStyle = '#ffdd00';
+    ctx.beginPath();
+    ctx.moveTo(56, 40);
+    ctx.lineTo(92, 40);
+    ctx.lineTo(92, 75);
+    ctx.bezierCurveTo(92, 98, 74, 110, 74, 114);
+    ctx.bezierCurveTo(74, 110, 56, 98, 56, 75);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#033314';
+    ctx.beginPath();
+    ctx.arc(74, 76, 11, 0, Math.PI * 2);
+    ctx.fill();
+
+    // "SYNTEC" Main Brand Text (Bold italic white with drop shadow)
+    ctx.save();
+    ctx.font = '900 italic 68px "Arial Black", "Impact", sans-serif';
+    ctx.shadowColor = '#000000';
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('SYNTEC', 115, 105);
+
+    // Gold trim
+    ctx.shadowColor = 'transparent';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffe600';
+    ctx.strokeText('SYNTEC', 115, 105);
+    ctx.restore();
+
+    // Slogan: "UNLOCK THE POWER"
+    ctx.save();
+    ctx.font = '800 italic 28px "Arial", sans-serif';
+    ctx.fillStyle = '#ffe600';
+    ctx.shadowColor = '#000000';
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    ctx.fillText('UNLOCK THE POWER', 120, 142);
+    ctx.restore();
+
+    // Subtitle
+    ctx.fillStyle = '#b0d6be';
+    ctx.font = '700 13px monospace';
+    ctx.fillText('SHUTO HIGH-PERFORMANCE SYNTHETIC MOTOR OIL', 35, 236);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+function createDrainGrilleTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Deep pit dark base
+    ctx.fillStyle = '#06070a';
+    ctx.fillRect(0, 0, 256, 512);
+
+    // Cast iron frame borders
+    ctx.fillStyle = '#22252e';
+    ctx.fillRect(0, 0, 256, 18);
+    ctx.fillRect(0, 494, 256, 18);
+    ctx.fillRect(0, 0, 22, 512);
+    ctx.fillRect(234, 0, 22, 512);
+
+    // Metallic highlight lines on frame
+    ctx.strokeStyle = '#4a5062';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(2, 2, 252, 508);
+    ctx.strokeStyle = '#12141a';
+    ctx.strokeRect(21, 17, 214, 478);
+
+    // Corner & Side Hex Bolts
+    const boltPositions = [
+        [10, 10], [244, 10], [10, 502], [244, 502],
+        [10, 170], [244, 170], [10, 340], [244, 340]
+    ];
+    ctx.fillStyle = '#656e82';
+    boltPositions.forEach(([bx, by]) => {
+        ctx.beginPath();
+        ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1c202a';
+        ctx.beginPath();
+        ctx.arc(bx, by, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#656e82';
+    });
+
+    // Horizontal Iron Drainage Grille Bars
+    const numBars = 36;
+    const barHeight = 8;
+    const barSpacing = (474 - numBars * barHeight) / numBars;
+
+    for (let i = 0; i < numBars; i++) {
+        const y = 20 + i * (barHeight + barSpacing);
+
+        // Bar body (iron metal)
+        ctx.fillStyle = '#2b303c';
+        ctx.fillRect(26, y, 204, barHeight);
+
+        // Top specular edge highlight
+        ctx.fillStyle = '#566074';
+        ctx.fillRect(26, y, 204, 2);
+
+        // Bottom shadow
+        ctx.fillStyle = '#0a0b0e';
+        ctx.fillRect(26, y + barHeight - 2, 204, 2);
+
+        // Center spine divider
+        ctx.fillStyle = '#1e2129';
+        ctx.fillRect(124, y, 8, barHeight);
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+function createArchedWindowTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, 512, 512);
+
+    const archRadius = 220;
+    const archCenterX = 256;
+    const archCenterY = 220;
+
+    // Draw window glass path (arch top + rectangle bottom)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(archCenterX, archCenterY, archRadius, Math.PI, 0, false);
+    ctx.lineTo(archCenterX + archRadius, 500);
+    ctx.lineTo(archCenterX - archRadius, 500);
+    ctx.closePath();
+    ctx.clip();
+
+    // Subtle glass sheen
+    const glassGrad = ctx.createLinearGradient(0, 0, 512, 512);
+    glassGrad.addColorStop(0, 'rgba(80, 140, 200, 0.12)');
+    glassGrad.addColorStop(0.5, 'rgba(120, 170, 230, 0.05)');
+    glassGrad.addColorStop(1, 'rgba(30, 60, 110, 0.20)');
+    ctx.fillStyle = glassGrad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Diagonal Glass Reflection Streaks
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(80, 500);
+    ctx.lineTo(380, 0);
+    ctx.moveTo(150, 500);
+    ctx.lineTo(450, 0);
+    ctx.stroke();
+
+    // Multi-pane Steel Grids
+    // 3 Vertical Mullions
+    ctx.strokeStyle = '#181d27';
+    ctx.lineWidth = 10;
+    const colXs = [archCenterX - 110, archCenterX, archCenterX + 110];
+    colXs.forEach(cx => {
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, 512);
+        ctx.stroke();
+    });
+
+    // 5 Horizontal Muntin Bars
+    const rowYs = [130, 220, 310, 400, 490];
+    rowYs.forEach(ry => {
+        ctx.beginPath();
+        ctx.moveTo(0, ry);
+        ctx.lineTo(512, ry);
+        ctx.stroke();
+    });
+
+    // Steel grid highlight lines
+    ctx.strokeStyle = '#384357';
+    ctx.lineWidth = 2;
+    colXs.forEach(cx => {
+        ctx.beginPath();
+        ctx.moveTo(cx + 3, 0);
+        ctx.lineTo(cx + 3, 512);
+        ctx.stroke();
+    });
+    rowYs.forEach(ry => {
+        ctx.beginPath();
+        ctx.moveTo(0, ry - 3);
+        ctx.lineTo(512, ry - 3);
+        ctx.stroke();
+    });
+
+    ctx.restore();
+
+    // Heavy Outer Frame
+    ctx.strokeStyle = '#10131a';
+    ctx.lineWidth = 22;
+    ctx.beginPath();
+    ctx.arc(archCenterX, archCenterY, archRadius, Math.PI, 0, false);
+    ctx.lineTo(archCenterX + archRadius, 505);
+    ctx.lineTo(archCenterX - archRadius, 505);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Frame bevel highlight
+    ctx.strokeStyle = '#323c4e';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(archCenterX, archCenterY, archRadius - 8, Math.PI, 0, false);
+    ctx.lineTo(archCenterX + archRadius - 8, 498);
+    ctx.lineTo(archCenterX + archRadius + 8, 498);
+    ctx.closePath();
+    ctx.stroke();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
 function buildSafehouseGarage() {
     safehouseGroup = new THREE.Group();
     safehouseGroup.visible = false;
 
-    // 1. Showroom Polished Asphalt Floor (with subtle reflectivity)
+    // 1. Showroom Polished Asphalt & Concrete Floor
     const floorGeo = new THREE.PlaneGeometry(80, 80);
     const floorMat = new THREE.MeshStandardMaterial({
         color: 0x141824,
-        roughness: 0.35,
-        metalness: 0.4
+        roughness: 0.38,
+        metalness: 0.35
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.02;
     safehouseGroup.add(floor);
 
-    // Tire marks / skid marks on floor
+    // Cast Iron Slotted Floor Drain Grille directly under the car (matching Screenshot 2)
+    const drainGeo = new THREE.PlaneGeometry(2.6, 12);
+    const drainMat = new THREE.MeshStandardMaterial({
+        map: createDrainGrilleTexture(),
+        roughness: 0.5,
+        metalness: 0.7,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1
+    });
+    const drainMesh = new THREE.Mesh(drainGeo, drainMat);
+    drainMesh.rotation.x = -Math.PI / 2;
+    drainMesh.position.set(0, 0.006, 0.5);
+    safehouseGroup.add(drainMesh);
+
+    // Tire skid marks on floor
     const skidGeo = new THREE.RingGeometry(2.6, 3.4, 32);
     const skidMat = new THREE.MeshBasicMaterial({
         color: 0x070912,
@@ -2057,84 +2538,236 @@ function buildSafehouseGarage() {
     skidMesh.position.set(0, 0.01, 0);
     safehouseGroup.add(skidMesh);
 
-    // 2. Back Workshop Wall with industrial bays
-    const backWallGeo = new THREE.BoxGeometry(70, 18, 1.5);
+    // 2. Night Suspension Bridge Panorama visible through the large arched windows
+    const bridgeGeo = new THREE.PlaneGeometry(68, 22);
+    const bridgeMat = new THREE.MeshBasicMaterial({
+        map: createBridgeBackdropTexture(),
+        fog: false
+    });
+    const bridgeBackdrop = new THREE.Mesh(bridgeGeo, bridgeMat);
+    bridgeBackdrop.position.set(0, 9.5, -13.2);
+    safehouseGroup.add(bridgeBackdrop);
+
+    // Back Wall Structure with 3 Arched Openings
     const backWallMat = new THREE.MeshStandardMaterial({
-        color: 0x181d2a,
+        color: 0x161a25,
+        roughness: 0.85,
+        metalness: 0.3
+    });
+    
+    // Bottom apron
+    const backApronGeo = new THREE.BoxGeometry(64, 2.5, 0.8);
+    const backApron = new THREE.Mesh(backApronGeo, backWallMat);
+    backApron.position.set(0, 1.25, -11.8);
+    safehouseGroup.add(backApron);
+
+    // Top lintel
+    const backLintelGeo = new THREE.BoxGeometry(64, 3.5, 0.8);
+    const backLintel = new THREE.Mesh(backLintelGeo, backWallMat);
+    backLintel.position.set(0, 15.5, -11.8);
+    safehouseGroup.add(backLintel);
+
+    // 3 Arched Windows
+    const windowMat = new THREE.MeshBasicMaterial({
+        map: createArchedWindowTexture(),
+        transparent: true,
+        opacity: 0.95
+    });
+
+    [-16, 0, 16].forEach(wx => {
+        const winGeo = new THREE.PlaneGeometry(12.5, 12.5);
+        const winMesh = new THREE.Mesh(winGeo, windowMat);
+        winMesh.position.set(wx, 8.8, -11.6);
+        safehouseGroup.add(winMesh);
+    });
+
+    // Wall dividers / piers between windows
+    [-8, 8, -24, 24].forEach(px => {
+        const pierGeo = new THREE.BoxGeometry(3.5, 14, 0.9);
+        const pier = new THREE.Mesh(pierGeo, backWallMat);
+        pier.position.set(px, 7.5, -11.8);
+        safehouseGroup.add(pier);
+    });
+
+    // 3. Left Wall with Syntec Banner, Oil Rack, and Stepladder (matching Screenshot 2)
+    const leftWallMat = new THREE.MeshStandardMaterial({
+        color: 0x202430,
         roughness: 0.8,
         metalness: 0.2
     });
-    const backWall = new THREE.Mesh(backWallGeo, backWallMat);
-    backWall.position.set(0, 9, -12);
-    safehouseGroup.add(backWall);
+    const leftWallGeo = new THREE.BoxGeometry(0.8, 18, 36);
+    const leftWall = new THREE.Mesh(leftWallGeo, leftWallMat);
+    leftWall.position.set(-18, 9, 0);
+    safehouseGroup.add(leftWall);
 
-    // Garage Bay Roller Shutter Doors (2 bays)
-    [-13, 13].forEach(xBay => {
-        const bayDoorGeo = new THREE.BoxGeometry(18, 11, 0.4);
-        const bayDoorMat = new THREE.MeshStandardMaterial({
-            color: 0x242a3a,
-            roughness: 0.4,
-            metalness: 0.8
-        });
-        const bayDoor = new THREE.Mesh(bayDoorGeo, bayDoorMat);
-        bayDoor.position.set(xBay, 5.5, -11.1);
-        safehouseGroup.add(bayDoor);
+    // Syntec "Unlock The Power" Parody Banner
+    const bannerGeo = new THREE.PlaneGeometry(9.5, 4.8);
+    const bannerMat = new THREE.MeshBasicMaterial({
+        map: createSyntecBannerTexture(),
+        side: THREE.DoubleSide
+    });
+    const syntecBanner = new THREE.Mesh(bannerGeo, bannerMat);
+    syntecBanner.rotation.y = Math.PI / 2;
+    syntecBanner.position.set(-17.55, 7.5, -2.5);
+    safehouseGroup.add(syntecBanner);
+
+    // Oil Bottle Display Rack under the Syntec Banner
+    const rackMat = new THREE.MeshStandardMaterial({ color: 0x181a20, metalness: 0.8, roughness: 0.3 });
+    const shelfGroup = new THREE.Group();
+    // 4 vertical rack posts
+    [[-1.8, -0.4], [1.8, -0.4], [-1.8, 0.4], [1.8, 0.4]].forEach(([rx, rz]) => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.2), rackMat);
+        post.position.set(rx, 1.6, rz);
+        shelfGroup.add(post);
+    });
+    // 3 shelves
+    [0.7, 1.5, 2.3].forEach(sy => {
+        const shelf = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 0.9), rackMat);
+        shelf.position.set(0, sy, 0);
+        shelfGroup.add(shelf);
+
+        // Rows of Syntec motor oil bottles (green & silver)
+        for (let b = 0; b < 7; b++) {
+            const bx = -1.5 + b * 0.5;
+            const isGreen = (b % 2 === 0);
+            const bottleMat = new THREE.MeshStandardMaterial({
+                color: isGreen ? 0x0a6b28 : 0xb8c0cc,
+                metalness: isGreen ? 0.2 : 0.8,
+                roughness: 0.3
+            });
+            const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.35, 10), bottleMat);
+            bottle.position.set(bx, sy + 0.175, 0);
+            shelfGroup.add(bottle);
+            // Cap
+            const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.08, 8), new THREE.MeshBasicMaterial({ color: isGreen ? 0xffcc00 : 0x111111 }));
+            cap.position.set(bx, sy + 0.39, 0);
+            shelfGroup.add(cap);
+        }
+    });
+    shelfGroup.position.set(-17.1, 0, -2.5);
+    shelfGroup.rotation.y = Math.PI / 2;
+    safehouseGroup.add(shelfGroup);
+
+    // Wooden A-Frame Stepladder leaning by the wall (matching Screenshot 2)
+    const ladderGroup = new THREE.Group();
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x9b7848, roughness: 0.75 });
+    const legGeo = new THREE.BoxGeometry(0.08, 3.6, 0.1);
+    const leftLeg = new THREE.Mesh(legGeo, woodMat);
+    leftLeg.rotation.z = 0.12;
+    leftLeg.position.set(-0.35, 1.75, 0);
+    ladderGroup.add(leftLeg);
+
+    const rightLeg = new THREE.Mesh(legGeo, woodMat);
+    rightLeg.rotation.z = -0.12;
+    rightLeg.position.set(0.35, 1.75, 0);
+    ladderGroup.add(rightLeg);
+
+    for (let st = 0; st < 5; st++) {
+        const stepY = 0.6 + st * 0.55;
+        const stepW = 0.65 - st * 0.06;
+        const step = new THREE.Mesh(new THREE.BoxGeometry(stepW, 0.05, 0.16), woodMat);
+        step.position.set(0, stepY, 0);
+        ladderGroup.add(step);
+    }
+    ladderGroup.rotation.y = Math.PI / 2 + 0.18;
+    ladderGroup.rotation.x = -0.14;
+    ladderGroup.position.set(-17.2, 0, 2.2);
+    safehouseGroup.add(ladderGroup);
+
+    // 4. Right Wall with Industrial Bay Door & Tool Chest
+    const rightWallGeo = new THREE.BoxGeometry(0.8, 18, 36);
+    const rightWall = new THREE.Mesh(rightWallGeo, leftWallMat);
+    rightWall.position.set(18, 9, 0);
+    safehouseGroup.add(rightWall);
+
+    // Garage Roller Shutter Door
+    const shutterGeo = new THREE.BoxGeometry(0.4, 11, 14);
+    const shutterMat = new THREE.MeshStandardMaterial({ color: 0x242b3a, roughness: 0.45, metalness: 0.75 });
+    const shutter = new THREE.Mesh(shutterGeo, shutterMat);
+    shutter.position.set(17.5, 5.5, -2);
+    safehouseGroup.add(shutter);
+
+    // Red Mechanic Tool Chest with Drawers
+    const toolChestGroup = new THREE.Group();
+    const chestBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.8, 3.2), new THREE.MeshStandardMaterial({ color: 0xbb1122, roughness: 0.35, metalness: 0.4 }));
+    chestBody.position.y = 0.9;
+    toolChestGroup.add(chestBody);
+    for (let dr = 0; dr < 4; dr++) {
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.8), new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.9 }));
+        handle.rotation.z = Math.PI / 2;
+        handle.position.set(-0.72, 0.45 + dr * 0.36, 0);
+        toolChestGroup.add(handle);
+    }
+    toolChestGroup.position.set(16.5, 0, 5.5);
+    safehouseGroup.add(toolChestGroup);
+
+    // Tire stacks
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.85 });
+    [-15.5, 15.5].forEach(xStack => {
+        for (let j = 0; j < 3; j++) {
+            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.45, 18), tireMat);
+            tire.position.set(xStack + (Math.random() * 0.4), 0.225 + (j * 0.45), -8);
+            safehouseGroup.add(tire);
+        }
     });
 
-    // Concrete Industrial Pillars with hazard stripes
-    [-24, -4, 4, 24].forEach(xPillar => {
-        const pillarGeo = new THREE.BoxGeometry(1.4, 18, 1.4);
-        const pillarMat = new THREE.MeshStandardMaterial({
-            color: 0x303646,
-            roughness: 0.6,
-            metalness: 0.5
-        });
-        const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-        pillar.position.set(xPillar, 9, -11);
-        safehouseGroup.add(pillar);
+    // 5. Overhead Warehouse Steel Roof Trusses & Hanging Lamps
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x1e2432, roughness: 0.6, metalness: 0.8 });
+    [-8, 0, 8].forEach(tz => {
+        const beamTop = new THREE.Mesh(new THREE.BoxGeometry(36, 0.35, 0.35), trussMat);
+        beamTop.position.set(0, 15.5, tz);
+        safehouseGroup.add(beamTop);
+
+        const beamBottom = new THREE.Mesh(new THREE.BoxGeometry(36, 0.35, 0.35), trussMat);
+        beamBottom.position.set(0, 13.5, tz);
+        safehouseGroup.add(beamBottom);
+
+        for (let ws = -15; ws <= 15; ws += 3) {
+            const strut = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.3, 0.2), trussMat);
+            strut.rotation.z = (ws % 6 === 0) ? 0.55 : -0.55;
+            strut.position.set(ws, 14.5, tz);
+            safehouseGroup.add(strut);
+        }
     });
 
-    // 3. Iconic Red Neon Sign (NFS Carbon "PALMONT CITY MOTOR" style)
-    const signFrameGeo = new THREE.BoxGeometry(26, 2.0, 0.5);
-    const signFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f1118, metalness: 0.9, roughness: 0.2 });
-    const signFrame = new THREE.Mesh(signFrameGeo, signFrameMat);
-    signFrame.position.set(0, 11.5, -11);
-    safehouseGroup.add(signFrame);
+    // Hanging Industrial Pendant Lamps
+    const lampMat = new THREE.MeshStandardMaterial({ color: 0x11141c, metalness: 0.8 });
+    [[-3, 0], [3, 0]].forEach(([lx, lz]) => {
+        const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 5.5), lampMat);
+        wire.position.set(lx, 10.8, lz);
+        safehouseGroup.add(wire);
 
-    // Glowing Neon Bar Letters "SHUTO SPEED MOTOR // 東京首都高"
-    const neonBarGeo = new THREE.BoxGeometry(24, 0.9, 0.3);
-    const neonBarMat = new THREE.MeshBasicMaterial({ color: 0xff1144 });
-    const neonBar = new THREE.Mesh(neonBarGeo, neonBarMat);
-    neonBar.position.set(0, 11.5, -10.7);
-    safehouseGroup.add(neonBar);
+        const shade = new THREE.Mesh(new THREE.ConeGeometry(0.55, 0.5, 16, 1, true), lampMat);
+        shade.position.set(lx, 8.2, lz);
+        safehouseGroup.add(shade);
 
-    // Red Neon Glow Spill Light
-    const neonPointLight = new THREE.PointLight(0xff1155, 3.5, 30);
-    neonPointLight.position.set(0, 11, -9);
-    safehouseGroup.add(neonPointLight);
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), new THREE.MeshBasicMaterial({ color: 0xfff0c8 }));
+        bulb.position.set(lx, 8.0, lz);
+        safehouseGroup.add(bulb);
+    });
 
-    // 4. Signature Curved Blue Neon Light Ribbon (NFS Carbon Light Trail)
+    // 6. Signature Curved Neon Light Ribbon (NFS Carbon Light Trail)
     const curvePoints = [
-        new THREE.Vector3(-14, 0.5, 4),
-        new THREE.Vector3(-8, 3.8, 2),
-        new THREE.Vector3(-3, 4.8, -1),
-        new THREE.Vector3(2, 3.2, -4),
-        new THREE.Vector3(8, 2.5, -3),
-        new THREE.Vector3(14, 4.2, 3),
-        new THREE.Vector3(18, 1.0, 6)
+        new THREE.Vector3(-14, 0.6, -1),
+        new THREE.Vector3(-9, 1.2, 1.8),
+        new THREE.Vector3(-4, 0.4, 3.4),
+        new THREE.Vector3(1.5, 0.9, 3.6),
+        new THREE.Vector3(7, 2.2, 1.2),
+        new THREE.Vector3(12, 4.0, -1.5),
+        new THREE.Vector3(16, 2.2, -4)
     ];
     const ribbonCurve = new THREE.CatmullRomCurve3(curvePoints);
-    const tubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.14, 8, false);
+    const tubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.12, 8, false);
     const ribbonMat = new THREE.MeshBasicMaterial({
-        color: 0x00e5ff,
+        color: 0x00ffc8,
         transparent: true,
-        opacity: 0.9
+        opacity: 0.95
     });
     safehouseRibbon = new THREE.Mesh(tubeGeo, ribbonMat);
     safehouseGroup.add(safehouseRibbon);
 
-    // Extra outer glow tube
-    const outerTubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.4, 8, false);
+    // Outer glow tube
+    const outerTubeGeo = new THREE.TubeGeometry(ribbonCurve, 80, 0.38, 8, false);
     const outerTubeMat = new THREE.MeshBasicMaterial({
         color: 0x0088ff,
         transparent: true,
@@ -2144,29 +2777,24 @@ function buildSafehouseGarage() {
     const outerRibbon = new THREE.Mesh(outerTubeGeo, outerTubeMat);
     safehouseRibbon.add(outerRibbon);
 
-    // 5. Tire stacks & Oil barrels
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.85 });
-    [-9, 9].forEach(xStack => {
-        for (let j = 0; j < 3; j++) {
-            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.45, 18), tireMat);
-            tire.position.set(xStack + (Math.random() * 0.4), 0.225 + (j * 0.45), -6);
-            safehouseGroup.add(tire);
-        }
-    });
-
-    // 6. Showcase Key Spotlight on Car
-    const carSpotlight = new THREE.SpotLight(0xfff8ee, 3.8, 25, Math.PI / 4, 0.4, 1);
-    carSpotlight.position.set(4, 8, 5);
+    // 7. Showcase Spotlights on Car
+    const carSpotlight = new THREE.SpotLight(0xfff5e6, 3.8, 28, Math.PI / 4, 0.38, 1);
+    carSpotlight.position.set(3, 8.5, 4.5);
     carSpotlight.target.position.set(0, 0.5, 0);
     safehouseGroup.add(carSpotlight);
     safehouseGroup.add(carSpotlight.target);
 
     // Cyan Rim Fill Light
-    const cyanRimLight = new THREE.SpotLight(0x00ffcc, 2.8, 20, Math.PI / 3, 0.5, 1);
-    cyanRimLight.position.set(-6, 4, -4);
+    const cyanRimLight = new THREE.SpotLight(0x00ffc8, 2.8, 24, Math.PI / 3, 0.5, 1);
+    cyanRimLight.position.set(-6, 5, -4);
     cyanRimLight.target.position.set(0, 0.5, 0);
     safehouseGroup.add(cyanRimLight);
     safehouseGroup.add(cyanRimLight.target);
+
+    // Soft Ambient Warm Fill from window bridge
+    const windowAmbLight = new THREE.PointLight(0x5a3b72, 2.2, 30);
+    windowAmbLight.position.set(0, 9, -10);
+    safehouseGroup.add(windowAmbLight);
 
     scene.add(safehouseGroup);
 }
@@ -2364,6 +2992,19 @@ function updateCarbonMenuCarCard() {
 
     if (barSpeed) barSpeed.style.width = `${Math.min(100, (currentCarData.specs.topSpeed / 380) * 100)}%`;
     if (barAccel) barAccel.style.width = `${Math.min(100, ((6.5 - currentCarData.specs.accel) / 4) * 100)}%`;
+
+    // Dynamic Career % and Cash for NFS Carbon Status Panel (matching Screenshot 2)
+    const careerPctEl = document.getElementById('cmenu-career-percent');
+    const careerCashEl = document.getElementById('cmenu-career-cash');
+    if (careerPctEl && typeof BLACKLIST_DATABASE !== 'undefined') {
+        const defeatedCount = BLACKLIST_DATABASE.filter(b => b.defeated).length;
+        const pct = Math.round((defeatedCount / BLACKLIST_DATABASE.length) * 100);
+        careerPctEl.innerText = `${pct}%`;
+    }
+    if (careerCashEl) {
+        const cashVal = typeof playerMoney !== 'undefined' ? playerMoney : (typeof playerBounty !== 'undefined' ? playerBounty : 15000);
+        careerCashEl.innerText = `${cashVal.toLocaleString().replace(/,/g, ' ')}`;
+    }
 }
 
 function cycleNextCarFromMenu() {
