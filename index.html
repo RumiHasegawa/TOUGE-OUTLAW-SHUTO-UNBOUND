@@ -1830,6 +1830,116 @@
         </div>
     </div>
 
+    <!-- CINEMATIC VIDEO PROLOGUE MODAL (NFS MOST WANTED 2005 FMV) -->
+    <div id="prologue-video-modal" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: 500;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+    ">
+        <video id="prologue-video-player" playsinline style="
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        " preload="auto">
+            <source src="assets/video/prologue.mp4" type="video/mp4">
+        </video>
+
+        <!-- Top Cinematic Vignette & Controls -->
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+            box-sizing: border-box;
+            z-index: 510;
+        ">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-family: 'Bangers', cursive; font-size: 24px; letter-spacing: 2px; color: #ffe600; text-shadow: 0 0 12px rgba(255,230,0,0.8), 2px 2px 0px #000;">
+                    ★ PROLOGUE: THE ARRIVAL & THE BETRAYAL ★
+                </div>
+                <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00ffc8; letter-spacing: 1.5px; font-weight: 700;">
+                    NEED FOR SPEED: MOST WANTED 2005 // TOKYO SHUTO PROLOGUE
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button id="video-unmute-btn" onclick="togglePrologueAudio()" style="
+                    background: rgba(10, 15, 25, 0.85);
+                    border: 2px solid #ffe600;
+                    color: #ffe600;
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 12px;
+                    font-weight: 800;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    letter-spacing: 1px;
+                    box-shadow: 0 0 15px rgba(255, 230, 0, 0.4);
+                ">
+                    🔊 SUARA
+                </button>
+
+                <button onclick="skipPrologueVideo()" style="
+                    background: rgba(10, 15, 25, 0.85);
+                    border: 2px solid #00ffc8;
+                    color: #00ffc8;
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 12px;
+                    font-weight: 800;
+                    padding: 8px 18px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    letter-spacing: 2px;
+                    box-shadow: 0 0 15px rgba(0, 255, 200, 0.4);
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='#00ffc8'; this.style.color='#000';" onmouseout="this.style.background='rgba(10, 15, 25, 0.85)'; this.style.color='#00ffc8';">
+                    LEWATI (SKIP ▶)
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Subtitle / Tap indicator -->
+        <div style="
+            position: absolute;
+            bottom: 24px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 510;
+        ">
+            <div style="
+                display: inline-block;
+                background: rgba(0, 0, 0, 0.75);
+                border-bottom: 2px solid #ffe600;
+                padding: 6px 20px;
+                border-radius: 4px;
+                font-size: 13px;
+                color: #fff;
+                font-family: 'Rajdhani', sans-serif;
+                font-weight: 600;
+                letter-spacing: 1px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            ">
+                🎬 KETUK LAYAR UNTUK PAUSE / PUTAR ULANG
+            </div>
+        </div>
+    </div>
+
     <!-- Game Scripts -->
     <script src="src/carsData.js"></script>
     <script src="src/crewData.js"></script>

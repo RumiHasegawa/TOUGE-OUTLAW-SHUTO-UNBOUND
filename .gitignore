@@ -8,5 +8,4 @@ Thumbs.db
 car_scan_results.json
 *.log
 www/
-
-
+assets/video/*.mp4

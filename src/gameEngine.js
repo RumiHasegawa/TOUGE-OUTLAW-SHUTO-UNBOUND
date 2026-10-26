@@ -801,7 +801,11 @@ function updateCarPhysics(delta) {
         playerCar.wheels[0].rotation.y = steerAngle;
         playerCar.wheels[1].rotation.y = steerAngle;
         const wheelSpin = (speed * 0.1);
-        playerCar.wheels.forEach(w => w.children[0].rotation.x += wheelSpin);
+        playerCar.wheels.forEach(w => {
+            if (w && w.children && w.children[0] && w.children[0].rotation) {
+                w.children[0].rotation.x += wheelSpin;
+            }
+        });
     }
 
     // Canyon Boundary Guardrail Collision (Jatuh / Tabrak Pagar)
@@ -906,7 +910,7 @@ function saveGameData() {
             underglowColor: underglowColor,
             smokeColor: smokeColor,
             activeTag: effectsManager ? effectsManager.activeTag : "cyber_wings",
-            character: playerCharacter,
+            character: typeof playerCharacter !== 'undefined' ? playerCharacter : null,
             saveTimestamp: Date.now()
         };
         localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
@@ -3104,8 +3108,121 @@ function executeCarbonMenuAction() {
 
 function startStoryModeCareer() {
     showCarbonLoadingScreen(() => {
-        startJapaneseIntroCutscene();
+        playPrologueVideo();
     }, 1400, 4); // Tip index 4: Story Mode / Career tip
+}
+
+function playPrologueVideo() {
+    isSafehouseMode = false;
+    const menuEl = document.getElementById('carbon-main-menu');
+    if (menuEl) menuEl.style.display = 'none';
+    if (safehouseGroup) safehouseGroup.visible = false;
+    roadSegments.forEach(r => r.group.visible = false);
+
+    // Stop BGM agar audio video NFS MW jelas terdengar
+    if (typeof musicEngine !== 'undefined') {
+        if (typeof musicEngine.stopBgm === 'function') musicEngine.stopBgm();
+        else if (typeof musicEngine.stopBgmLoop === 'function') musicEngine.stopBgmLoop();
+    }
+
+    const modal = document.getElementById('prologue-video-modal');
+    const player = document.getElementById('prologue-video-player');
+
+    if (!modal || !player) {
+        startJapaneseIntroCutscene();
+        return;
+    }
+
+    modal.style.display = 'flex';
+    player.currentTime = 0;
+    player.muted = false;
+
+    // Click on video to toggle play/pause
+    player.onclick = () => {
+        if (player.paused) player.play();
+        else player.pause();
+    };
+
+    player.onended = () => {
+        onPrologueVideoFinished();
+    };
+
+    const playPromise = player.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(err => {
+            console.warn("Autoplay with audio blocked by browser, trying muted:", err);
+            player.muted = true;
+            player.play();
+            const btn = document.getElementById('video-unmute-btn');
+            if (btn) btn.innerText = "🔇 AKTIFKAN SUARA";
+        });
+    }
+}
+
+function togglePrologueAudio() {
+    const player = document.getElementById('prologue-video-player');
+    const btn = document.getElementById('video-unmute-btn');
+    if (!player) return;
+
+    player.muted = !player.muted;
+    if (btn) {
+        btn.innerText = player.muted ? "🔇 AKTIFKAN SUARA" : "🔊 SUARA AKTIF";
+        btn.style.color = player.muted ? "#ff0055" : "#ffe600";
+        btn.style.borderColor = player.muted ? "#ff0055" : "#ffe600";
+    }
+}
+
+function skipPrologueVideo() {
+    onPrologueVideoFinished();
+}
+
+function onPrologueVideoFinished() {
+    const modal = document.getElementById('prologue-video-modal');
+    const player = document.getElementById('prologue-video-player');
+
+    if (player) {
+        player.pause();
+        player.currentTime = 0;
+    }
+
+    if (modal) {
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.style.opacity = '1';
+        }, 500);
+    }
+
+    // Masuk ke Balapan Starter Car (Civique EK9) setelah Skyline disabotase Kenji
+    isSafehouseMode = false;
+    roadSegments.forEach(r => r.group.visible = true);
+
+    const starterCar = CAR_DATABASE.find(c => c.id === "civic_ek9") || CAR_DATABASE.find(c => c.id === "civic_si_1999") || CAR_DATABASE[0];
+    if (starterCar) {
+        currentCarData = starterCar;
+        spawnPlayerCar(currentCarData);
+        saveGameData();
+    }
+
+    if (playerCar) {
+        playerCar.position.set(0, 0, 0);
+        playerCar.rotation.set(0, 0, 0);
+    }
+    speed = 110;
+
+    const hudOverlay = document.getElementById('hud-overlay');
+    if (hudOverlay) hudOverlay.style.display = 'flex';
+
+    if (typeof musicEngine !== 'undefined') {
+        musicEngine.setMusicMood("sprint");
+        musicEngine.startBgmLoop();
+    }
+
+    showRadioMessage("BLOWN ENGINE!", "Skyline-mu meledak disabotase Kenji! Mobilmu dirampas dan disita! Sekarang bawa Civique Sport-R milik Yuki!", "💥");
+    setTimeout(() => {
+        showRadioMessage("YUKI [DRAFTER]", "Jangan menyerah! Kalahkan semua kroco Blacklist Cinders dan rebut kembali Skyline-mu!", "🏎️");
+    }, 4500);
 }
 
 function startFreeRoam(locationName = "Tokyo Shuto C1 Loop") {

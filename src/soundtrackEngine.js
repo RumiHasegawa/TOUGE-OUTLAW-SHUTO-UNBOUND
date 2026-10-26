@@ -177,6 +177,10 @@ class HardcoreMusicEngine {
         }
         this.isPlaying = false;
     }
+
+    stopBgmLoop() {
+        this.stopBgm();
+    }
 }
 
 // Global Music Engine Instance
