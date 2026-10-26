@@ -2868,6 +2868,97 @@ function setupSafehouseControls() {
     window.addEventListener('touchend', () => { isSafehouseDragging = false; });
 }
 
+// ============================================================
+// --- NFS CARBON AUTHENTIC LOADING SCREEN CONTROLLER ---
+// ============================================================
+let loadingScreenTimeout = null;
+let loadingScreenActive = false;
+let onLoadingCompleteCallback = null;
+
+const CARBON_LOADING_TIPS = [
+    {
+        title: "ZONE HEAT",
+        desc: "Check your map to see how much cop activity each zone has. The more you race in any given area, the more likely it is that you will be chased in the middle of the race there. The more you race in any given zone, the more cops will start patrolling there. To let the Heat cool down, avoid racing in that zone for a while."
+    },
+    {
+        title: "WINGMAN DRAFT",
+        desc: "Panggil Yuki Kusanagi dengan menekan tombol CREW saat balapan. Masuk ke koridor slipstream di belakang mobilnya untuk melipatgandakan dorongan angin dan mencapai top speed maksimal di trek lurus Shuto."
+    },
+    {
+        title: "CANYON DRIFT",
+        desc: "Di duel jurang tebing Hakone, jangan biarkan mobilmu menghantam guardrail dengan kecepatan tinggi. Menabrak pembatas jalan dengan keras akan membuat mobil terjun bebas ke jurang dan langsung kalah (DNF)!"
+    },
+    {
+        title: "AUTOSCULPT FITMENT",
+        desc: "Modifikasi ceper suspensi dan kemiringan camber di Garasi. Sudut camber negatif memberikan cengkeraman ban ekstra pada tikungan tajam kecepatan tinggi di C1 Loop."
+    }
+];
+
+function showCarbonLoadingScreen(callback, durationMs = 1800, tipIdx = 0) {
+    const screen = document.getElementById('carbon-loading-screen');
+    const titleEl = document.getElementById('loading-tip-title');
+    const descEl = document.getElementById('loading-tip-desc');
+
+    if (!screen) {
+        if (callback) callback();
+        return;
+    }
+
+    const tip = CARBON_LOADING_TIPS[tipIdx % CARBON_LOADING_TIPS.length];
+    if (titleEl) titleEl.innerText = tip.title;
+    if (descEl) descEl.innerText = tip.desc;
+
+    onLoadingCompleteCallback = callback;
+    loadingScreenActive = true;
+
+    screen.style.display = 'block';
+    // Force reflow for CSS opacity transition
+    void screen.offsetWidth;
+    screen.style.opacity = '1';
+
+    if (loadingScreenTimeout) clearTimeout(loadingScreenTimeout);
+    loadingScreenTimeout = setTimeout(() => {
+        skipCarbonLoading();
+    }, durationMs);
+}
+
+function skipCarbonLoading() {
+    if (!loadingScreenActive) return;
+    loadingScreenActive = false;
+    if (loadingScreenTimeout) clearTimeout(loadingScreenTimeout);
+
+    const screen = document.getElementById('carbon-loading-screen');
+    if (screen) {
+        screen.style.opacity = '0';
+        setTimeout(() => {
+            screen.style.display = 'none';
+        }, 350);
+    }
+
+    if (onLoadingCompleteCallback) {
+        const cb = onLoadingCompleteCallback;
+        onLoadingCompleteCallback = null;
+        cb();
+    }
+}
+
+function triggerStartWithLoading() {
+    const titleScreen = document.getElementById('title-screen');
+    if (titleScreen) {
+        titleScreen.style.opacity = '0';
+        setTimeout(() => { titleScreen.style.display = 'none'; }, 400);
+    }
+
+    // SFX tombol start
+    playSynthTone(180, 0.4, 'sawtooth', 0.25);
+    setTimeout(() => playSynthTone(540, 0.6, 'sine', 0.2), 120);
+
+    // Buka NFS Carbon Loading Screen (Zone Heat) sebelum masuk garasi safehouse
+    showCarbonLoadingScreen(() => {
+        openCarbonMainMenu();
+    }, 1800, 0);
+}
+
 function openCarbonMainMenu() {
     isSafehouseMode = true;
 
@@ -2995,30 +3086,32 @@ function executeCarbonMenuAction() {
 }
 
 function startFreeRoam(locationName = "Tokyo Shuto C1 Loop") {
-    isSafehouseMode = false;
-    const menuEl = document.getElementById('carbon-main-menu');
-    if (menuEl) menuEl.style.display = 'none';
+    showCarbonLoadingScreen(() => {
+        isSafehouseMode = false;
+        const menuEl = document.getElementById('carbon-main-menu');
+        if (menuEl) menuEl.style.display = 'none';
 
-    toggleShutoMapModal(false);
+        toggleShutoMapModal(false);
 
-    if (safehouseGroup) safehouseGroup.visible = false;
-    roadSegments.forEach(r => r.group.visible = true);
+        if (safehouseGroup) safehouseGroup.visible = false;
+        roadSegments.forEach(r => r.group.visible = true);
 
-    const hudOverlay = document.getElementById('hud-overlay');
-    if (hudOverlay) hudOverlay.style.display = 'flex';
+        const hudOverlay = document.getElementById('hud-overlay');
+        if (hudOverlay) hudOverlay.style.display = 'flex';
 
-    if (playerCar) {
-        playerCar.position.set(0, 0, 0);
-        playerCar.rotation.set(0, 0, 0);
-    }
-    speed = 95; // Kecepatan jelajah awal di tol
+        if (playerCar) {
+            playerCar.position.set(0, 0, 0);
+            playerCar.rotation.set(0, 0, 0);
+        }
+        speed = 95; // Kecepatan jelajah awal di tol
 
-    if (typeof musicEngine !== 'undefined') {
-        musicEngine.setMusicMood("freeroam");
-        musicEngine.startBgmLoop();
-    }
+        if (typeof musicEngine !== 'undefined') {
+            musicEngine.setMusicMood("freeroam");
+            musicEngine.startBgmLoop();
+        }
 
-    showRadioMessage("FREE ROAM", `JELAJAH BEBAS: ${locationName.toUpperCase()}! Geber gas pol, nikmati malam Tokyo, atau cari rival!`, "🌃");
+        showRadioMessage("FREE ROAM", `JELAJAH BEBAS: ${locationName.toUpperCase()}! Geber gas pol, nikmati malam Tokyo, atau cari rival!`, "🌃");
+    }, 1200, 1);
 }
 
 function toggleShutoMapModal(open) {
@@ -3042,7 +3135,9 @@ function returnToCarbonMainMenu() {
     toggleCharacterCreator(false);
     toggleShutoMapModal(false);
 
-    openCarbonMainMenu();
+    showCarbonLoadingScreen(() => {
+        openCarbonMainMenu();
+    }, 1000, 0);
 }
 
 function updateCarbonMenuCarCard() {
