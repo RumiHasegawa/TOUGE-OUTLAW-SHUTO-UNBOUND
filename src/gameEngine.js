@@ -2904,6 +2904,10 @@ const CARBON_LOADING_TIPS = [
     {
         title: "AUTOSCULPT FITMENT",
         desc: "Modifikasi ceper suspensi dan kemiringan camber di Garasi. Sudut camber negatif memberikan cengkeraman ban ekstra pada tikungan tajam kecepatan tinggi di C1 Loop."
+    },
+    {
+        title: "STORY MODE // CAREER",
+        desc: "Kenji 'The Demon' Akimoto merebut Skyline GT-RR 34 kebanggaanmu lewat taruhan Pink Slip curang di gerbang tol C1. Bersama Yuki Kusanagi, bangun reputasi dari starter car, kuasai Shuto Loop, dan rebut kembali mobilmu!"
     }
 ];
 
@@ -3058,7 +3062,7 @@ function selectCarbonMenuTab(tabKey) {
     if (actionLabel) {
         if (tabKey === 'freeroam') actionLabel.innerText = "JELAJAH BEBAS (FREE ROAM)";
         else if (tabKey === 'map') actionLabel.innerText = "BUKA PETA SHUTO GPS";
-        else if (tabKey === 'career') actionLabel.innerText = "MULAI KARIER";
+        else if (tabKey === 'career') actionLabel.innerText = "MULAI STORY MODE // CAREER";
         else if (tabKey === 'garage') actionLabel.innerText = "MODIFIKASI DI GARASI";
         else if (tabKey === 'blacklist') actionLabel.innerText = "TANTANG KUROLIST 17";
         else if (tabKey === 'character') actionLabel.innerText = "CUSTOM DRIVER";
@@ -3088,7 +3092,7 @@ function executeCarbonMenuAction() {
     } else if (currentMenuTab === 'map') {
         toggleShutoMapModal(true);
     } else if (currentMenuTab === 'career') {
-        startJapaneseIntroCutscene();
+        startStoryModeCareer();
     } else if (currentMenuTab === 'garage') {
         toggleGarage(true);
     } else if (currentMenuTab === 'blacklist') {
@@ -3096,6 +3100,12 @@ function executeCarbonMenuAction() {
     } else if (currentMenuTab === 'character') {
         toggleCharacterCreator(true);
     }
+}
+
+function startStoryModeCareer() {
+    showCarbonLoadingScreen(() => {
+        startJapaneseIntroCutscene();
+    }, 1400, 4); // Tip index 4: Story Mode / Career tip
 }
 
 function startFreeRoam(locationName = "Tokyo Shuto C1 Loop") {
