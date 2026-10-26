@@ -1894,18 +1894,52 @@ endCutscene = function() {
     }
 };
 
-// Ganti musik ke Garage Trap saat buka garasi
+let isGarageCustomizeOpen = false;
+
+// Ganti musik ke Garage Trap saat buka garasi & aktifkan kamera customizer
 const oldToggleGarage = typeof toggleGarage === 'function' ? toggleGarage : null;
 toggleGarage = function(open) {
+    isGarageCustomizeOpen = open;
     const modal = document.getElementById('garage-modal');
+    const carbonMenu = document.getElementById('carbon-main-menu');
+    const hudOverlay = document.getElementById('hud-overlay');
+
     if (modal) modal.style.display = open ? 'flex' : 'none';
-    if (!open) {
+
+    if (open) {
+        if (carbonMenu) carbonMenu.style.display = 'none';
+        if (hudOverlay) hudOverlay.style.display = 'none';
+
+        isSafehouseMode = true;
+        if (safehouseGroup) safehouseGroup.visible = true;
+        roadSegments.forEach(r => r.group.visible = false);
+
+        // Update tag mobil & kas
+        const carTag = document.getElementById('garage-active-car-tag');
+        const cashDisplay = document.getElementById('garage-cash-display');
+        if (carTag && currentCarData) carTag.innerText = `${currentCarData.brand} // ${currentCarData.parodyName}`.toUpperCase();
+        if (cashDisplay) {
+            const cashVal = typeof playerMoney !== 'undefined' ? playerMoney : (typeof playerBounty !== 'undefined' ? playerBounty : 15000);
+            cashDisplay.innerText = `KAS: ¥${cashVal.toLocaleString().replace(/,/g, ' ')}`;
+        }
+
+        renderGarageCategories('bodykit');
+
+        // Posisikan mobil agak ke kanan agar tidak tertutup panel kustomisasi
+        if (playerCar) {
+            playerCar.position.set(0.6, 0, 0);
+            playerCar.rotation.set(0, -0.42, 0);
+        }
+
+        if (typeof musicEngine !== 'undefined') {
+            musicEngine.setMusicMood("garage");
+            musicEngine.startBgmLoop();
+        }
+    } else {
         spawnPlayerCar(currentCarData);
         saveGameData();
         showRadioMessage("SAVE COMPLETED", "Data modifikasi mobil & stance tersimpan aman!", "💾");
-        if (typeof musicEngine !== 'undefined') musicEngine.setMusicMood("freeroam");
-    } else {
-        if (typeof musicEngine !== 'undefined') musicEngine.setMusicMood("garage");
+        openCarbonMainMenu();
     }
 };
 
@@ -2897,8 +2931,13 @@ function updateSafehouseTurntable(delta) {
         safehouseRibbon.rotation.y = Math.sin(performance.now() * 0.001) * 0.04;
     }
 
-    camera.position.set(3.8, 1.4, 5.2);
-    camera.lookAt(0, 0.7, 0);
+    if (isGarageCustomizeOpen) {
+        camera.position.set(3.2, 1.35, 4.8);
+        camera.lookAt(0.6, 0.65, 0);
+    } else {
+        camera.position.set(3.8, 1.4, 5.2);
+        camera.lookAt(0, 0.7, 0);
+    }
 }
 
 function selectCarbonMenuTab(tabKey) {

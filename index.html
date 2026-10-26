@@ -273,69 +273,82 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(8, 10, 18, 0.92);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: flex;
+            background: transparent;
+            z-index: 125;
+            display: none;
             flex-direction: column;
-            pointer-events: auto;
+            pointer-events: none;
         }
         .garage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
-            border-bottom: 2px solid #ff0055;
-            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 24px;
+            background: linear-gradient(180deg, rgba(6, 10, 20, 0.95), rgba(6, 10, 20, 0.7));
+            border-bottom: 2px solid #00ffc8;
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
         }
         .garage-title {
             font-family: 'Bangers', cursive;
-            font-size: 32px;
-            color: #00ffff;
+            font-size: 28px;
+            color: #00ffc8;
             letter-spacing: 2px;
-            text-shadow: 2px 2px 0 #ff0055;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.6);
         }
         .garage-content {
             flex: 1;
             display: flex;
             overflow: hidden;
+            pointer-events: none;
         }
         .garage-sidebar {
-            width: 280px;
-            background: rgba(12, 16, 26, 0.95);
-            border-right: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 15px;
+            width: 250px;
+            background: rgba(6, 10, 20, 0.92);
+            border-right: 1px solid rgba(0, 255, 200, 0.3);
+            padding: 14px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.85);
         }
         .garage-panel {
-            flex: 1;
-            padding: 20px;
+            width: 400px;
+            max-width: 46vw;
+            background: rgba(8, 14, 26, 0.92);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 18px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            box-shadow: 15px 0 35px rgba(0,0,0,0.9);
         }
         .cat-btn {
-            padding: 12px 16px;
-            background: rgba(25, 30, 45, 0.8);
-            border: 2px solid transparent;
+            padding: 10px 14px;
+            background: rgba(20, 25, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 3px solid transparent;
             color: #aaa;
             font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             text-align: left;
             border-radius: 4px;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
         }
         .cat-btn:hover, .cat-btn.active {
             color: #fff;
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.15);
+            border-left-color: #00ffc8;
+            background: linear-gradient(90deg, rgba(0, 255, 200, 0.18), rgba(0, 255, 200, 0.02));
             transform: translateX(4px);
+            text-shadow: 0 0 8px #00ffc8;
         }
 
         .part-grid {
@@ -1230,32 +1243,43 @@
         </div>
     </div>
 
-    <!-- NFS UNBOUND STYLE GARAGE MODAL -->
+    <!-- NFS CARBON & UNBOUND IN-SAFEHOUSE CUSTOMIZE MODAL -->
     <div id="garage-modal" style="display: none;">
         <div class="garage-header">
-            <div class="garage-title">CUSTOM GARAGE // MECHA WORKS</div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div style="font-size: 14px; color: #00ffaa; font-weight: 700;">CASH: ¥12,500,000</div>
-                <button class="btn-action" onclick="toggleGarage(false)">TURUN KE JALANAN</button>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="garage-title" style="color: #00ffc8;">МОДИФИКАЦИЯ // CUSTOMIZE SAFEHOUSE</div>
+                <div style="font-family: 'Orbitron'; font-size: 11px; color: #ffe600; background: rgba(255,230,0,0.15); padding: 3px 8px; border-radius: 4px; border: 1px solid #ffe600;" id="garage-active-car-tag">HODANA CIVIQUE</div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <div style="font-size: 14px; color: #ffe600; font-family: 'Orbitron'; font-weight: 700;" id="garage-cash-display">KAS: ¥15 000</div>
+                <button class="btn-action" style="font-size: 13px; padding: 6px 14px; background: #00ffc8; color: #040812;" onclick="startFreeRoam()">🏎️ TEST DRIVE FREE ROAM</button>
+                <button class="btn-action" style="font-size: 13px; padding: 6px 14px;" onclick="toggleGarage(false)">💾 SIMPAN & MENU</button>
             </div>
         </div>
 
         <div class="garage-content">
             <!-- Sidebar Category -->
             <div class="garage-sidebar">
-                <button class="cat-btn active" onclick="switchGarageTab('cars')">PILIH MOBIL</button>
-                <button class="cat-btn" onclick="switchGarageTab('bodykit')">BODY KIT & AERO</button>
-                <button class="cat-btn" onclick="switchGarageTab('tuning')">PERFORMANCE TUNING</button>
-                <button class="cat-btn" onclick="switchGarageTab('vinyl')">VINYL & DECAL LIVERY</button>
-                <button class="cat-btn" onclick="switchGarageTab('bumper_delete')">BUMPER DELETE</button>
-                <button class="cat-btn" onclick="switchGarageTab('stance')">STANCE & FITMENT</button>
-                <button class="cat-btn" onclick="switchGarageTab('paint')">WARNA & NEON</button>
-                <button class="cat-btn" onclick="switchGarageTab('unbound_tags')">UNBOUND ANIME TAGS</button>
+                <button class="cat-btn active" onclick="switchGarageTab('cars')">🏎️ PILIH MOBIL</button>
+                <button class="cat-btn" onclick="switchGarageTab('bodykit')">🏁 BODY KIT & AERO</button>
+                <button class="cat-btn" onclick="switchGarageTab('paint')">🎨 WARNA & NEON</button>
+                <button class="cat-btn" onclick="switchGarageTab('stance')">📐 STANCE & CEPER</button>
+                <button class="cat-btn" onclick="switchGarageTab('vinyl')">🏷️ VINYL & LIVERY</button>
+                <button class="cat-btn" onclick="switchGarageTab('bumper_delete')">🔧 BUMPER DELETE</button>
+                <button class="cat-btn" onclick="switchGarageTab('tuning')">⚡ PERFORMANCE TUNING</button>
+                <button class="cat-btn" onclick="switchGarageTab('unbound_tags')">💨 UNBOUND TAGS</button>
             </div>
 
             <!-- Main Panel Content -->
             <div class="garage-panel" id="garage-panel-body">
                 <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Right 3D Area Drag Hint -->
+            <div style="flex: 1; display: flex; align-items: flex-end; justify-content: flex-end; padding: 20px; pointer-events: none;">
+                <div style="background: rgba(6, 10, 20, 0.85); border: 1px solid rgba(0, 255, 200, 0.4); padding: 8px 16px; border-radius: 20px; font-family: 'Orbitron'; font-size: 11px; color: #00ffc8; backdrop-filter: blur(6px); pointer-events: auto;">
+                    ⟳ DRAG DI SINI UNTUK PUTAR MOBIL 360°
+                </div>
             </div>
         </div>
     </div>
