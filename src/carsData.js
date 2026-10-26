@@ -149,7 +149,7 @@ const CAR_DATABASE = [
         baseModel: {
             folder: "nissan-fairlady-z-s30-devil-z",
             modelPath: "models/nissan-fairlady-z-s30-devil-z",
-            fbxFile: "source/Devil%20Z.fbx",
+            fbxFile: "source/Devil Z.fbx",
             textures: "textures/",
             scale: 0.015,
         },

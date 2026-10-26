@@ -313,25 +313,26 @@ function createProceduralCarMesh(carData) {
     // ================================================================
     // 2. WIDEBODY OVERFENDERS / FLARED WHEEL ARCHES (Aggressive Stance)
     // ================================================================
-    const fenderGeo = new THREE.CylinderGeometry(0.48, 0.52, 0.16, 16, 1, false, 0, Math.PI);
-    const fenderFL = new THREE.Mesh(fenderGeo, bodyMat);
-    fenderFL.rotation.z = Math.PI / 2;
-    fenderFL.rotation.y = Math.PI / 2;
-    fenderFL.position.set(-0.96, 0.46, -1.30);
-    carRoot.add(fenderFL);
+    // Molded aerodynamic blister arches flush over the wheel wells
+    const flareGeo = new THREE.BoxGeometry(0.14, 0.18, 0.98);
+    const flareFL = new THREE.Mesh(flareGeo, bodyMat);
+    flareFL.position.set(-0.98, 0.52, -1.30);
+    flareFL.rotation.z = 0.08;
+    carRoot.add(flareFL);
 
-    const fenderFR = fenderFL.clone();
-    fenderFR.rotation.y = -Math.PI / 2;
-    fenderFR.position.x = 0.96;
-    carRoot.add(fenderFR);
+    const flareFR = flareFL.clone();
+    flareFR.position.x = 0.98;
+    flareFR.rotation.z = -0.08;
+    carRoot.add(flareFR);
 
-    const fenderRL = fenderFL.clone();
-    fenderRL.position.set(-0.98, 0.46, 1.30);
-    carRoot.add(fenderRL);
+    const flareRL = flareFL.clone();
+    flareRL.position.set(-1.00, 0.52, 1.30);
+    carRoot.add(flareRL);
 
-    const fenderRR = fenderFR.clone();
-    fenderRR.position.set(0.98, 0.46, 1.30);
-    carRoot.add(fenderRR);
+    const flareRR = flareFR.clone();
+    flareRR.position.x = 1.00;
+    flareRR.rotation.z = -0.08;
+    carRoot.add(flareRR);
 
     // ================================================================
     // 3. FRONT FASCIA: SLOPED HOOD, GRILLE & INTERCOOLER
@@ -817,8 +818,15 @@ function _spawnFromBaseModel(carData, kit) {
 function _loadAndSpawn(modelPath, color, scale, carData, kit) {
     loadModel3D(modelPath, color, scale,
         (obj) => {
+            const prevRot = playerCar ? playerCar.rotation.y : (isSafehouseMode ? 2.7 : 0);
+            const prevPos = (playerCar && playerCar.position && typeof playerCar.position.clone === 'function')
+                ? playerCar.position.clone()
+                : (isSafehouseMode ? new THREE.Vector3(0.6, 0, 0) : new THREE.Vector3(0, 0, 0));
+
             if (playerCar) scene.remove(playerCar);
             playerCar = obj;
+            playerCar.position.copy(prevPos);
+            playerCar.rotation.y = prevRot;
             scene.add(playerCar);
             if (typeof updateCarTexture === 'function') updateCarTexture();
             const kitName = kit ? kit.name : "Stock";
@@ -832,9 +840,15 @@ function _loadAndSpawn(modelPath, color, scale, carData, kit) {
 }
 
 function _fallbackProcedural(carData) {
+    const prevRot = playerCar ? playerCar.rotation.y : (isSafehouseMode ? 2.7 : 0);
+    const prevPos = (playerCar && playerCar.position && typeof playerCar.position.clone === 'function')
+        ? playerCar.position.clone()
+        : new THREE.Vector3(0, 0, 0);
+
     if (playerCar) scene.remove(playerCar);
     playerCar = createProceduralCarMesh(carData);
-    playerCar.position.set(0, 0, 0);
+    playerCar.position.copy(prevPos);
+    playerCar.rotation.y = prevRot;
     scene.add(playerCar);
     if (typeof updateCarTexture === 'function') updateCarTexture();
 }

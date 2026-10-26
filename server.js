@@ -34,8 +34,8 @@ const server = http.createServer((req, res) => {
 
     const filePath = path.join(__dirname, reqUrl);
 
-    // Prevent directory traversal
-    if (!filePath.startsWith(__dirname)) {
+    // Prevent directory traversal (case-insensitive for Windows)
+    if (!filePath.toLowerCase().startsWith(__dirname.toLowerCase())) {
         res.writeHead(403);
         res.end('Access Denied');
         return;
