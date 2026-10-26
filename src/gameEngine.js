@@ -2025,8 +2025,8 @@ let safehouseRibbon = null;
 let safehouseDragVelocity = 0;
 let isSafehouseDragging = false;
 let safehouseLastX = 0;
-let currentMenuTab = 'career';
-const CARBON_MENU_TABS = ['career', 'garage', 'blacklist', 'character', 'quickrace'];
+let currentMenuTab = 'freeroam';
+const CARBON_MENU_TABS = ['freeroam', 'map', 'career', 'garage', 'blacklist', 'character'];
 
 // --- PROCEDURAL TEXTURES FOR NFS CARBON SAFEHOUSE GARAGE ---
 function createBridgeBackdropTexture() {
@@ -2911,6 +2911,17 @@ function selectCarbonMenuTab(tabKey) {
         }
     });
 
+    const actionLabel = document.getElementById('cmenu-action-label');
+    if (actionLabel) {
+        if (tabKey === 'freeroam') actionLabel.innerText = "JELAJAH BEBAS (FREE ROAM)";
+        else if (tabKey === 'map') actionLabel.innerText = "BUKA PETA SHUTO GPS";
+        else if (tabKey === 'career') actionLabel.innerText = "MULAI KARIER";
+        else if (tabKey === 'garage') actionLabel.innerText = "MODIFIKASI DI GARASI";
+        else if (tabKey === 'blacklist') actionLabel.innerText = "TANTANG KUROLIST 17";
+        else if (tabKey === 'character') actionLabel.innerText = "CUSTOM DRIVER";
+        else actionLabel.innerText = "PILIH";
+    }
+
     playSynthTone(320, 0.08, 'sine', 0.2);
 }
 
@@ -2929,7 +2940,11 @@ function prevCarbonMenuTab() {
 function executeCarbonMenuAction() {
     playSynthTone(550, 0.15, 'sawtooth', 0.25);
 
-    if (currentMenuTab === 'career') {
+    if (currentMenuTab === 'freeroam') {
+        startFreeRoam();
+    } else if (currentMenuTab === 'map') {
+        toggleShutoMapModal(true);
+    } else if (currentMenuTab === 'career') {
         startJapaneseIntroCutscene();
     } else if (currentMenuTab === 'garage') {
         toggleGarage(true);
@@ -2937,15 +2952,15 @@ function executeCarbonMenuAction() {
         toggleBlacklistModal(true);
     } else if (currentMenuTab === 'character') {
         toggleCharacterCreator(true);
-    } else if (currentMenuTab === 'quickrace') {
-        startQuickRaceDirectly();
     }
 }
 
-function startQuickRaceDirectly() {
+function startFreeRoam(locationName = "Tokyo Shuto C1 Loop") {
     isSafehouseMode = false;
     const menuEl = document.getElementById('carbon-main-menu');
     if (menuEl) menuEl.style.display = 'none';
+
+    toggleShutoMapModal(false);
 
     if (safehouseGroup) safehouseGroup.visible = false;
     roadSegments.forEach(r => r.group.visible = true);
@@ -2957,12 +2972,28 @@ function startQuickRaceDirectly() {
         playerCar.position.set(0, 0, 0);
         playerCar.rotation.set(0, 0, 0);
     }
-    speed = 120; // Langsung tancap gas!
+    speed = 95; // Kecepatan jelajah awal di tol
 
+    if (typeof musicEngine !== 'undefined') {
+        musicEngine.setMusicMood("freeroam");
+        musicEngine.startBgmLoop();
+    }
+
+    showRadioMessage("FREE ROAM", `JELAJAH BEBAS: ${locationName.toUpperCase()}! Geber gas pol, nikmati malam Tokyo, atau cari rival!`, "🌃");
+}
+
+function toggleShutoMapModal(open) {
+    const modal = document.getElementById('shuto-map-modal');
+    if (modal) modal.style.display = open ? 'flex' : 'none';
+    if (open) playSynthTone(400, 0.1, 'sine', 0.2);
+}
+
+function startQuickRaceDirectly() {
+    startFreeRoam("C1 Canyon Sprint");
+    speed = 130;
     if (typeof musicEngine !== 'undefined') {
         musicEngine.setMusicMood("sprint");
     }
-
     showRadioMessage("RACE START!", "HAJAR GAS POL! SHUTO EXPRESSWAY CANYON SPRINT!", "🏁");
 }
 
@@ -2970,6 +3001,7 @@ function returnToCarbonMainMenu() {
     toggleGarage(false);
     toggleBlacklistModal(false);
     toggleCharacterCreator(false);
+    toggleShutoMapModal(false);
 
     openCarbonMainMenu();
 }

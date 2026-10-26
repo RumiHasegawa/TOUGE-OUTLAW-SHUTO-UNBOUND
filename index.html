@@ -1077,11 +1077,12 @@
                     <div class="filmstrip-arrow" onclick="prevCarbonMenuTab()">◀</div>
                     <div class="filmstrip-dots">▪ ▪ ▪</div>
                     
-                    <button class="carbon-tab-item active" id="cmenu-career" onclick="selectCarbonMenuTab('career')">КАРЬЕРА // KARIER</button>
+                    <button class="carbon-tab-item active" id="cmenu-freeroam" onclick="selectCarbonMenuTab('freeroam')">СВОБОДНОЕ ВОЖДЕНИЕ // FREE ROAM</button>
+                    <button class="carbon-tab-item" id="cmenu-map" onclick="selectCarbonMenuTab('map')">КАРТА // PETA SHUTO</button>
+                    <button class="carbon-tab-item" id="cmenu-career" onclick="selectCarbonMenuTab('career')">КАРЬЕРА // KARIER</button>
                     <button class="carbon-tab-item" id="cmenu-garage" onclick="selectCarbonMenuTab('garage')">МОИ МАШИНЫ // GARASI</button>
                     <button class="carbon-tab-item" id="cmenu-blacklist" onclick="selectCarbonMenuTab('blacklist')">ЧЕРНЫЙ СПИСОК // KUROLIST 17</button>
                     <button class="carbon-tab-item" id="cmenu-character" onclick="selectCarbonMenuTab('character')">ВОДИТЕЛЬ // KARAKTER</button>
-                    <button class="carbon-tab-item" id="cmenu-quickrace" onclick="selectCarbonMenuTab('quickrace')">СВОБОДНАЯ ГОНКА // BALAP</button>
 
                     <div class="filmstrip-dots">▪ ▪ ▪</div>
                     <div class="filmstrip-arrow" onclick="nextCarbonMenuTab()">▶</div>
@@ -1132,7 +1133,15 @@
             <div class="carbon-prompts-bar">
                 <div class="carbon-pill" onclick="executeCarbonMenuAction()">
                     <span class="carbon-key-badge">↵ / TAP</span>
-                    <span>PILIH</span>
+                    <span id="cmenu-action-label">JELAJAH BEBAS (FREE ROAM)</span>
+                </div>
+                <div class="carbon-pill" onclick="startFreeRoam()">
+                    <span class="carbon-key-badge">GAS</span>
+                    <span>GAS KE TOL 🏎️</span>
+                </div>
+                <div class="carbon-pill" onclick="toggleShutoMapModal(true)">
+                    <span class="carbon-key-badge">MAP</span>
+                    <span>PETA SHUTO GPS 🗺️</span>
                 </div>
                 <div class="carbon-pill" onclick="nextCarbonMenuTab()">
                     <span class="carbon-key-badge">◀ ▶</span>
@@ -1141,10 +1150,6 @@
                 <div class="carbon-pill">
                     <span class="carbon-key-badge">⟳ DRAG</span>
                     <span>PUTAR MOBIL 360°</span>
-                </div>
-                <div class="carbon-pill" onclick="startQuickRaceDirectly()">
-                    <span class="carbon-key-badge">GAS</span>
-                    <span>LANGSUNG BALAP</span>
                 </div>
             </div>
         </div>
@@ -1353,6 +1358,118 @@
             <!-- Options Panel Body -->
             <div class="garage-panel" id="char-panel-body">
                 <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- NFS CARBON TERRITORY & SHUTO EXPRESSWAY MAP MODAL (КАРТА ТОКИО) -->
+    <div id="shuto-map-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 16, 0.95); backdrop-filter: blur(10px); z-index: 135; flex-direction: column; pointer-events: auto;">
+        <div class="garage-header">
+            <div class="garage-title" style="color: #00ffc8;">КАРТА ТОКИО // TOKYO SHUTO GPS & TERRITORY MAP</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="btn-action" style="font-size: 14px; padding: 6px 16px; background: #00ffc8; color: #050b14;" onclick="startFreeRoam()">🏎️ MASUK FREE ROAM</button>
+                <button class="btn-action" style="font-size: 14px; padding: 6px 16px;" onclick="toggleShutoMapModal(false)">TUTUP</button>
+            </div>
+        </div>
+
+        <div class="garage-content" style="padding: 20px; display: flex; gap: 20px;">
+            <!-- Left Side: Interactive Territory SVG Map -->
+            <div style="flex: 2; background: rgba(10, 15, 26, 0.92); border: 1px solid rgba(0, 255, 200, 0.3); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                <div style="font-family: 'Orbitron'; font-size: 12px; color: #00ffc8; font-weight: 700; letter-spacing: 2px;">
+                    RADAR PETA WILAYAH KOTA TOKYO // SHUTO EXPRESSWAY NETWORK
+                </div>
+
+                <!-- Stylized Territory Vector Map -->
+                <svg viewBox="0 0 600 360" style="width: 100%; height: 280px; margin: 10px 0; background: radial-gradient(circle, #0e1526 20%, #060914 90%); border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);">
+                    <defs>
+                        <pattern id="mapGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0, 255, 200, 0.08)" stroke-width="1" />
+                        </pattern>
+                    </defs>
+                    <rect width="600" height="360" fill="url(#mapGrid)" />
+
+                    <!-- Territory Zones -->
+                    <!-- C1 Inner Loop (Night Phantom - Blue) -->
+                    <circle cx="240" cy="180" r="85" fill="rgba(0, 255, 200, 0.12)" stroke="#00ffc8" stroke-width="2" stroke-dasharray="6,4" />
+                    <!-- Wangan Bayside (Midnight Cinders - Red) -->
+                    <ellipse cx="420" cy="230" rx="110" ry="60" fill="rgba(255, 0, 85, 0.12)" stroke="#ff0055" stroke-width="2" stroke-dasharray="6,4" />
+                    <!-- Hakone Touge (Canyon Boss Duel - Purple) -->
+                    <polygon points="60,60 170,40 130,160 50,140" fill="rgba(170, 0, 255, 0.14)" stroke="#aa00ff" stroke-width="2" stroke-dasharray="6,4" />
+
+                    <!-- Highway Arteries -->
+                    <!-- C1 Loop Road -->
+                    <ellipse cx="240" cy="180" rx="60" ry="45" fill="none" stroke="#ffe600" stroke-width="5" />
+                    <!-- Wangan Highspeed Line -->
+                    <path d="M 270 210 Q 380 230 540 260" fill="none" stroke="#00ffc8" stroke-width="5" />
+                    <!-- Canyon Pass to Hakone -->
+                    <path d="M 210 145 Q 140 100 80 70" fill="none" stroke="#ff0055" stroke-width="4" stroke-dasharray="8,4" />
+
+                    <!-- Map Markers -->
+                    <!-- Daikoku PA Safehouse (Garage) -->
+                    <g transform="translate(360, 220)" style="cursor: pointer;" onclick="returnToCarbonMainMenu()">
+                        <circle r="14" fill="#00ffc8" opacity="0.3">
+                            <animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle r="9" fill="#00ffc8" />
+                        <text x="0" y="4" font-size="9" text-anchor="middle" font-weight="900" fill="#000">🏠</text>
+                        <text x="0" y="24" font-family="'Orbitron'" font-size="10" font-weight="700" text-anchor="middle" fill="#00ffc8">SAFEHOUSE DAIKOKU</text>
+                    </g>
+
+                    <!-- Free Roam C1 Entrance -->
+                    <g transform="translate(240, 135)" style="cursor: pointer;" onclick="startFreeRoam('Shuto C1 Loop')">
+                        <circle r="12" fill="#ffe600" opacity="0.3">
+                            <animate attributeName="r" values="8;18;8" dur="1.5s" repeatCount="indefinite" />
+                        </circle>
+                        <circle r="8" fill="#ffe600" />
+                        <text x="0" y="4" font-size="9" text-anchor="middle" font-weight="900" fill="#000">🏎️</text>
+                        <text x="0" y="-12" font-family="'Orbitron'" font-size="10" font-weight="700" text-anchor="middle" fill="#ffe600">FREE ROAM C1</text>
+                    </g>
+
+                    <!-- KuroList Boss Duel Area -->
+                    <g transform="translate(95, 80)" style="cursor: pointer;" onclick="toggleBlacklistModal(true)">
+                        <circle r="12" fill="#ff0055" opacity="0.3">
+                            <animate attributeName="r" values="8;18;8" dur="1.8s" repeatCount="indefinite" />
+                        </circle>
+                        <circle r="8" fill="#ff0055" />
+                        <text x="0" y="4" font-size="9" text-anchor="middle" font-weight="900" fill="#fff">⚔️</text>
+                        <text x="0" y="22" font-family="'Orbitron'" font-size="10" font-weight="700" text-anchor="middle" fill="#ff0055">BOSS DUEL CANYON</text>
+                    </g>
+                </svg>
+
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #8899aa; font-family: 'Orbitron';">
+                    <span style="color: #00ffc8;">● NIGHT PHANTOM (TERITORI KITA)</span>
+                    <span style="color: #ff0055;">● MIDNIGHT CINDERS (TERITORI RIVAL)</span>
+                    <span style="color: #ffe600;">● ZONA JELAJAH BEBAS (FREE ROAM)</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Fast Travel & Sector Information -->
+            <div style="flex: 1; background: rgba(12, 16, 28, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="font-family: 'Bangers'; font-size: 24px; color: #ffe600; letter-spacing: 1px;">PILIHAN DESTINASI JELAJAH</div>
+                    <div style="font-size: 12px; color: #ccc; margin-top: 6px; line-height: 1.4;">
+                        Pilih lokasi untuk langsung masuk ke mode Free Roam atau balap duel melawan rival!
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px;">
+                        <button class="btn-action" style="font-size: 14px; padding: 10px; text-align: left; background: linear-gradient(90deg, rgba(0,255,200,0.25), rgba(0,255,200,0.05)); border: 1px solid #00ffc8; color: #fff;" onclick="startFreeRoam('Shuto C1 Inner Loop')">
+                            🏎️ <strong>FREE ROAM C1 LOOP</strong><br><span style="font-size: 10px; color: #00ffc8;">Jalan lingkar tol Tokyo, tikungan tajam, aspal mulus</span>
+                        </button>
+
+                        <button class="btn-action" style="font-size: 14px; padding: 10px; text-align: left; background: linear-gradient(90deg, rgba(255,230,0,0.25), rgba(255,230,0,0.05)); border: 1px solid #ffe600; color: #fff;" onclick="startFreeRoam('Wangan Bayside 300km/h')">
+                            ⚡ <strong>FREE ROAM WANGAN BAYSIDE</strong><br><span style="font-size: 10px; color: #ffe600;">Jalur lurus panjang Haneda-Odaiba, tes top speed 300+ km/h</span>
+                        </button>
+
+                        <button class="btn-action" style="font-size: 14px; padding: 10px; text-align: left; background: linear-gradient(90deg, rgba(255,0,85,0.25), rgba(255,0,85,0.05)); border: 1px solid #ff0055; color: #fff;" onclick="startFreeRoam('Hakone Touge Ridge')">
+                            🏔️ <strong>FREE ROAM HAKONE TOUGE</strong><br><span style="font-size: 10px; color: #ff0055;">Jalur pegunungan sempit, jurang maut, area drift murni</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px;">
+                    <button class="btn-action" style="flex: 1; font-size: 14px; padding: 10px;" onclick="returnToCarbonMainMenu()">🏠 GARASI</button>
+                    <button class="btn-action" style="flex: 1; font-size: 14px; padding: 10px; background: #00ffc8; color: #000;" onclick="startFreeRoam()">GAS SEKARANG ▶</button>
+                </div>
             </div>
         </div>
     </div>
